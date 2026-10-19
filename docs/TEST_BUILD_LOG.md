@@ -1,6 +1,6 @@
 # 0.1.0-test.1 — 19.10.2026
 
-Status: **installed, native locale bootstrap observed; visual/runtime acceptance pending**. No stable release.
+Status: **installed, tooltip display verified by user screenshot; stable/UX acceptance pending**. No stable release.
 
 Payload SHA-256: `15ff3725d3dca7bd07073a6afbfb7ea632625117da030d41ea750c607d4c5e6c` (185663 bytes).
 Original SHA-256: `f2e607c1a39377076913a4a04672139beaa514154499b9d024acccc07bfc3a96` (185662 bytes).
@@ -11,8 +11,16 @@ Exact final source commit is in the frozen local manifest and candidate source a
 - Relaunched host at 22:20:07 Moscow time. Log identifies application 2.58.17, Steam app 237990, locale ru; localeWranglerReadyHandler and BOOTSTRAPPED precede saga start page and completed load. No [ERROR] entries in sampled log.
 - Raw session snapshot hash at observation: b28950fb589a623a47be34590bfc8b98a3a31bb98312458f78323006a9c9d59f. Raw log contains private machine identifiers and stays local, not in Git.
 - Six save files before and after startup have identical SHA-256. This proves no change during this observed startup interval, not all future save compatibility.
-- Window capture repeatedly timed out, including a retry after the user closed the baseline game. One separate attempt reported user input. The timeout cause is unknown; no screenshot or observed tooltip is claimed.
-- User requested an isolated test save before gameplay. With host closed, profile 0 was cloned byte-for-byte into previously absent profile 1; all 5 copied files match and the original 6-file tree including master is unchanged. Separate backup ZIP SHA-256: c34e039ba4f77f43f040649410ac110401df2e3bf52baa68cd97c7029f0ad5b8. No save content is in Git. User must verify the second profile in the UI before playing.
-- Closed-file rollback to the original locale SHA and reinstall of the same candidate SHA were both verified. No runtime relaunch after rollback is claimed. Candidate remains installed, host left closed. Tooltip display/clipping and profile recognition await user evidence.
+- Window capture repeatedly timed out, including a retry after the user closed the baseline game. One separate attempt reported user input. The timeout cause is unknown. Subsequently the user supplied a screenshot; see the later evidence below.
+- User requested an isolated test save before gameplay. With host closed, profile 0 was cloned byte-for-byte into previously absent profile 1; all 5 copied files match and the original 6-file tree including master is unchanged. Separate backup ZIP SHA-256: c34e039ba4f77f43f040649410ac110401df2e3bf52baa68cd97c7029f0ad5b8. No save content is in Git. Subsequent runtime log confirms profile_index=[1] and a save to save/saga1/1/resume.save.json.
+- Closed-file rollback to the original locale SHA and reinstall of the same candidate SHA were both verified. No runtime relaunch after rollback is claimed. At that historical checkpoint the candidate remained installed and host was left closed. Subsequent test evidence follows below.
 
 Candidate is installed; leave its identity intact while awaiting user evidence. Do not rebuild different payload bytes under this version or merge to stable merely because native loading succeeded.
+
+## Subsequent user test
+
+- User screenshot SHA-256: 4d1cba93117cd7fc0611422c724ff7a153746ad499d14dcf1d7a42338cbaec67. Image retained only in ignored local/evidence, not published in Git.
+- Screenshot shows Iver strength 12/12 and the complete candidate tooltip including the new sentence, with no visible clipping in the submitted image. It is one long single-line strip: layout improvement remains a separate proposal, not an accepted implementation.
+- Current native log records GameConfig.loadSaga profile_index=[1], save_id=[resume], followed by save/saga1/1/resume.save.json. The test profile is loaded and used for autosave.
+- All five original profile-0 files still match the pre-test backup SHA-256. Shared master/settings are outside this per-profile guarantee.
+- This establishes real display and test-profile operation, not explicit user acceptance for stable promotion, general resolution coverage, or all tooltip consumers.
