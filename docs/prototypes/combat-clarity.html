@@ -1,0 +1,152 @@
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+<div id="bs-combat">
+<style>
+#bs-combat { --bs-bg:#202e35;--bs-panel:#182b32;--bs-text:#f3deb3;--bs-line:#688994;--bs-focus:#68c9dd;--bs-warn:#ffbc8e;--bs-field:#34434a;color:var(--bs-text);font:16px/1.45 Georgia,serif; }
+#bs-combat * {box-sizing:border-box}
+#bs-combat .bs-settings {display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px;color:var(--foreground);font:inherit}
+#bs-combat .bs-settings label {display:flex;flex-direction:column;gap:4px;min-width:130px;flex:1}
+#bs-combat .bs-settings select {font:inherit;max-width:100%;min-width:0;padding:7px;background:var(--bs-panel);color:var(--bs-text);border:1px solid var(--bs-line)}
+#bs-combat .bs-screen {background:var(--bs-bg);border:1px solid var(--bs-line);padding:16px;min-height:780px;position:relative}
+#bs-combat .bs-head {display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;margin:0 90px 12px 0}
+#bs-combat .bs-head strong {font-size:20px;font-weight:500}
+#bs-combat .bs-state {color:var(--bs-focus)}
+#bs-combat .bs-field {position:relative;background:var(--bs-field);min-height:285px;border-top:1px solid var(--bs-line);border-bottom:1px solid var(--bs-line);padding:14px}
+#bs-combat .bs-grid {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:repeat(4,51px);gap:4px;background:repeating-linear-gradient(135deg,transparent 0 47px,#60737b33 48px 49px);align-items:stretch}
+#bs-combat button {font:inherit;color:var(--bs-text);background:var(--bs-panel);border:1px solid var(--bs-line);padding:8px 11px;white-space:normal;min-width:0}
+#bs-combat button:disabled {opacity:.55}
+#bs-combat button[aria-pressed="true"] {border:2px solid var(--bs-focus);padding:7px 10px}
+#bs-combat .bs-unit {padding:3px;grid-column:2;grid-row:3;border-radius:38% 38% 8% 8%;font-size:14px}
+#bs-combat .bs-unit[data-target="enemy"] {grid-column:3;grid-row:3}
+#bs-combat .bs-unit[data-target="ally"] {grid-column:3;grid-row:2}
+#bs-combat .bs-unit[data-target="other"] {grid-column:4;grid-row:3}
+#bs-combat .bs-unit[data-target="actor"] {border-bottom:4px solid var(--bs-focus)}
+#bs-combat .bs-unit.bs-hit {box-shadow:inset 0 -4px var(--bs-warn)}
+#bs-combat .bs-field-note {margin-top:10px;font-size:13px}
+#bs-combat .bs-card {background:var(--bs-panel);border:1px solid var(--bs-line);padding:14px;z-index:1;width:100%;min-height:240px}
+#bs-combat [data-layout="near"] {display:grid;grid-template-columns:minmax(0,1fr);align-content:start}
+#bs-combat [data-layout="near"] .bs-field {grid-column:1;grid-row:2}
+#bs-combat [data-layout="near"] .bs-card {grid-column:1;grid-row:2;align-self:start;justify-self:end;margin:55px 0 15px;width:44%;min-height:285px;box-shadow:0 5px 18px #08171b77}
+#bs-combat [data-layout="near"] .bs-field {min-height:405px}
+#bs-combat [data-layout="near"] .bs-grid {width:57%;grid-template-columns:repeat(4,minmax(0,1fr))}
+#bs-combat [data-layout="near"][data-side="ally"] .bs-card {margin-top:15px}
+#bs-combat [data-layout="near"][data-side="other"] .bs-card {margin-top:95px}
+#bs-combat .bs-card-head {display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap;border-bottom:1px solid var(--bs-line);padding-bottom:7px;margin-bottom:9px}
+#bs-combat .bs-card-head h3 {font-size:20px;font-weight:500;margin:0}
+#bs-combat .bs-price {color:var(--bs-focus);white-space:nowrap}
+#bs-combat .bs-rule {margin:0 0 12px}
+#bs-combat .bs-result {margin:8px 0;color:var(--bs-text)}
+#bs-combat .bs-result strong {font-weight:500;color:var(--bs-focus)}
+#bs-combat .bs-warning {color:var(--bs-warn);margin:8px 0}
+#bs-combat .bs-actions {display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+#bs-combat .bs-primary {border-color:var(--bs-focus)}
+#bs-combat .bs-help {border-top:1px solid var(--bs-line);padding-top:9px;margin:9px 0}
+#bs-combat .bs-status {margin-top:12px;font-size:14px;min-height:42px}
+#bs-combat .bs-foot {display:flex;flex-wrap:wrap;gap:12px;border-top:1px solid var(--bs-line);margin-top:10px;padding-top:10px;font-size:14px}
+#bs-combat .bs-screen.bs-day {--bs-bg:#e3ded0;--bs-panel:#eee4cb;--bs-text:#203c43;--bs-field:#c1cbca;--bs-line:#627e84;--bs-focus:#086679;--bs-warn:#8c3020}
+@media(max-width:560px){#bs-combat .bs-screen{padding:10px;min-height:810px}#bs-combat .bs-head{margin-right:40px}#bs-combat [data-layout="near"] .bs-card{grid-row:3;width:100%;min-height:280px;margin:10px 0 0!important}#bs-combat [data-layout="near"] .bs-grid{width:100%}#bs-combat [data-layout="near"] .bs-field{min-height:275px}#bs-combat .bs-unit{font-size:12px}#bs-combat .bs-grid{gap:3px}}
+@media(prefers-reduced-motion:no-preference){#bs-combat .bs-card{transition:top .15s}}
+</style>
+<div class="bs-settings" aria-label="Условия сравнения">
+ <label>Действие<select data-setting="ability"><option value="wall">Каменная стена · I</option><option value="ram">Таран · I</option><option value="tempest">Ураган · I</option><option value="attack">Обычная атака</option></select></label>
+ <label>Ситуация<select data-setting="condition"><option value="ready">Доступно</option><option value="resource">Нет воли</option><option value="target">Неподходящая цель</option></select></label>
+ <label>Ввод<select data-setting="input"><option value="mouse">Мышь / клавиатура</option><option value="pad">Геймпад · модель фокуса</option></select></label>
+</div>
+<div class="viz-carousel" aria-label="Варианты боевых пояснений" data-previous-label="Предыдущий" data-next-label="Следующий">
+ <section data-variant="Рядом с целью" aria-label="Рядом с целью"><div class="bs-screen" data-layout="near"></div></section>
+ <section data-variant="Постоянная область" aria-label="Постоянная область" hidden><div class="bs-screen" data-layout="fixed"></div></section>
+</div>
+<script>
+(()=>{
+const root=document.getElementById('bs-combat');
+const cfg={ability:'wall',condition:'ready',input:'mouse',day:false,dense:false};
+const saved=window.openai?.widgetState?.modelContent;
+if(saved){for(const k of ['ability','condition','input']){const el=root.querySelector('[data-setting="'+k+'"]');if([...el.options].some(o=>o.value===saved[k])){cfg[k]=saved[k];el.value=saved[k];}}}
+const copy={
+ wall:{title:'Каменная стена',price:'1 воля',rule:'Блокирует 3 урона каждого удара по силе или броне в течение 1 хода.',result:'Защита самого бойца. Это не лечение и не общий запас защиты.',help:'Каждый входящий удар смягчается отдельно. Штатный срок — 1 ход. Сколько атак последует, заранее неизвестно.'},
+ ram:{title:'Таран',price:'1 воля',rule:'Отбрасывает соседнего воина до 4 клеток. Базовый урон броне: 1; ещё 1 за каждого воина, через которого пролетит цель.',result:'Броня и позиция цели изменятся. Точный путь и итоговый урон здесь не рассчитаны.',help:'Допустим и союзник. Нужны осевое положение и подходящее место отбрасывания. Добавочный урон получает отброшенная цель. Защитные эффекты и препятствия требуют штатной проверки.'},
+ tempest:{title:'Ураган',price:'1 воля',rule:'Удар по силе до 2 соседних фигур: от выбранной по часовой стрелке. Союзников тоже может задеть.',result:'Поражение соседних фигур. Числа текущего боя не подставлены.',help:'На первом уровне максимум 2 фигуры. Выбор первой меняет порядок. Кроме прямого урона могут сработать пассивные эффекты; полный итог здесь не рассчитан.'},
+ attack:{title:'Обычная атака',price:'Базовая: без воли',rule:'Выберите урон силе или броне. Усиление меняет расход и штатный прогноз.',result:'Сохраняем штатный прогноз выбранной атаки. Его чисел из текущего боя в этой схеме нет.',help:'Контрольный пример: мод не должен ухудшить полезный обычный прогноз. У силы и брони разные расчёты; усиление и вероятность берём из штатных потребителей.'}
+};
+const screens=[...root.querySelectorAll('.bs-screen')];
+const states=screens.map(()=>({stage:'view',target:'enemy',help:false,message:''}));
+const names={actor:'Сам боец',enemy:'Враг А',ally:'Союзник',other:'Враг Б'};
+screens.forEach((screen,i)=>{
+ screen.innerHTML=`<div class="bs-head"><strong>${i===0?'Рядом с целью':'Постоянная область'}</strong><span>Условная схема · не игра</span></div><div class="bs-field"><div class="bs-grid" aria-label="Условные фигуры"><button type="button" class="bs-unit" data-target="actor">Боец</button><button type="button" class="bs-unit" data-target="enemy">Враг А</button><button type="button" class="bs-unit" data-target="ally">Союзник</button><button type="button" class="bs-unit" data-target="other">Враг Б</button></div><div class="bs-field-note">Схема выбора; размеры фигур и расстояния условны.</div></div><div class="bs-card"><div class="bs-card-head"><h3></h3><span class="bs-price"></span></div><div class="bs-state"></div><p class="bs-rule"></p><div class="bs-result"></div><div class="bs-warning" role="status"></div><div class="bs-help" hidden></div><div class="bs-actions"><button type="button" class="bs-primary" data-action="next"></button><button type="button" data-action="help">Правило подробнее</button><button type="button" data-action="back">Назад</button></div></div><div class="bs-status" aria-live="polite"></div><div class="bs-foot"><span>Действует: безымянный боец</span><span class="bs-input"></span></div>`;
+ screen.addEventListener('click',e=>{
+  const unit=e.target.closest('[data-target]');
+  const act=e.target.closest('[data-action]');
+  if(unit){if(cfg.ability==='wall')return;states[i].target=unit.dataset.target;states[i].stage='selected';states[i].message='Цель выделена. Команда ещё не применена.';}
+  if(act)perform(i,act.dataset.action);
+  states.forEach((s,j)=>{if(j!==i)Object.assign(s,states[i]);});render();
+ });
+ screen.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();e.stopPropagation();perform(i,'back');states.forEach((s,j)=>{if(j!==i)Object.assign(s,states[i]);});render();}
+  if(cfg.input==='pad'&&['ArrowLeft','ArrowRight'].includes(e.key)&&cfg.ability!=='wall'){
+   e.preventDefault();const list=cfg.dense?['enemy','ally','other']:['enemy','ally'];const n=list.indexOf(states[i].target);states[i].target=list[(n+(e.key==='ArrowRight'?1:list.length-1))%list.length];states[i].stage='selected';states.forEach((s,j)=>{if(j!==i)Object.assign(s,states[i]);});render();
+  }
+ });
+});
+function invalid(s){
+ if(cfg.condition==='resource'&&cfg.ability!=='attack')return 'Недостаточно воли: нужно 1, доступно 0.';
+ if(cfg.condition==='target'&&s.stage==='selected'&&s.target==='enemy'&&cfg.ability==='ram')return 'Для этой цели нет допустимого места отбрасывания.';
+ if(cfg.condition==='target'&&s.stage==='selected'&&s.target==='enemy'&&cfg.ability==='tempest')return 'Эта фигура вне соседства: выберите другую цель.';
+ if(cfg.condition==='target'&&s.stage==='selected'&&s.target==='enemy'&&cfg.ability==='attack')return 'Эта цель вне досягаемости обычной атаки.';
+ if(cfg.ability==='attack'&&s.target==='ally'&&s.stage==='selected')return 'Обычная атака: выберите врага.';
+ if(cfg.ability==='ram'&&s.target==='actor'&&s.stage==='selected')return 'Таран: выберите другого воина.';
+ if(cfg.ability==='tempest'&&s.target==='actor'&&s.stage==='selected')return 'Выберите первую соседнюю фигуру.';
+ return '';
+}
+function perform(i,action){
+ const s=states[i];
+ if(action==='help'){s.help=!s.help;return;}
+ if(action==='back'){
+  if(s.help){s.help=false;return;}
+  if(s.stage==='selected'||s.stage==='choose'){s.stage='view';s.message='Возврат к действию. Просмотр ничего не потратил.';}
+  else {s.message='Вы у выбора действия. В игре следующий возврат зависит от активного слоя.';}
+  return;
+ }
+ if(action==='next'){
+  if(invalid(s))return;
+  if(s.stage==='done'){s.stage='view';s.message='Демонстрация сброшена.';return;}
+  if(s.stage==='view'){s.stage=cfg.ability==='wall'?'selected':'choose';s.target=cfg.ability==='wall'?'actor':'enemy';s.message='Пока только выбор. Расход не совершён.';return;}
+  if(s.stage==='choose'){s.stage='selected';s.message='Цель выделена. Команда ещё не применена.';return;}
+  s.stage='done';s.help=false;s.message='Демонстрация подтверждения завершена. Игра и ресурсы не изменены.';
+ }
+}
+function render(){
+ screens.forEach((screen,i)=>{
+  const s=states[i],c=copy[cfg.ability],bad=invalid(s),self=cfg.ability==='wall';
+  screen.classList.toggle('bs-day',cfg.day);screen.dataset.side=s.target;
+  screen.querySelector('h3').textContent=c.title+(cfg.ability==='attack'?'':' · I');
+  screen.querySelector('.bs-price').textContent=c.price;
+  screen.querySelector('.bs-state').textContent=({view:'Просмотр действия',choose:'Выбор цели',selected:'Перед применением',done:'Демонстрация завершена'})[s.stage];
+  screen.querySelector('.bs-rule').textContent=c.rule;
+  const result=screen.querySelector('.bs-result');
+  result.textContent='';const label=document.createElement('strong');label.textContent=(s.stage==='view'?'Цель: ':s.stage==='choose'?'Выберите: ':'Выбрано: ')+(self?'сам боец':s.stage==='view'?'ещё не выбрана':names[s.target]);result.append(label,document.createElement('br'),document.createTextNode(c.result));
+  const ally=cfg.ability==='tempest'&&s.stage==='selected';
+  screen.querySelector('.bs-warning').textContent=bad||(ally?'Возможен союзный урон. Подсветка набора здесь условная, не расчёт игры.':cfg.ability==='ram'&&s.target==='ally'&&s.stage==='selected'?'Выбрана своя фигура: она тоже получит воздействие.':'');
+  const help=screen.querySelector('.bs-help');help.hidden=!s.help;help.textContent=c.help;
+  const next=screen.querySelector('[data-action="next"]');
+  next.textContent=(cfg.input==='pad'?'A · ':'')+({view:'Выбрать действие',choose:'Выбрать '+names[s.target],selected:'Применить · демонстрация',done:'Начать снова'})[s.stage];next.disabled=!!bad;
+  screen.querySelector('[data-action="back"]').textContent=(cfg.input==='pad'?'B':'Esc')+' · '+(s.help?'Закрыть помощь':'Назад');
+  screen.querySelector('[data-action="help"]').textContent=s.help?'Свернуть правило':'Правило подробнее';
+  screen.querySelector('[data-action="help"]').setAttribute('aria-expanded',String(s.help));
+  screen.querySelector('.bs-status').textContent=s.message||(cfg.condition==='target'&&self?'Для SELF чужая цель не требуется; этот запрет здесь неприменим.':'Данные способности проверены. Геометрия и переходы — предложение.');
+  screen.querySelector('.bs-input').textContent=cfg.input==='pad'?'← → · модель перебора; A/B — подписи команд, физический геймпад не испытан':'Tab · фокус кнопок; Enter · команда; Esc · возврат в макете';
+  screen.querySelectorAll('.bs-unit').forEach(b=>{
+   const key=b.dataset.target;b.hidden=!cfg.dense&&key==='other';b.disabled=self&&key!=='actor';
+   b.setAttribute('aria-pressed',String(s.stage==='selected'&&key===(self?'actor':s.target)));
+   b.classList.toggle('bs-hit',ally&&(key===s.target||key==='ally'));
+  });
+ });
+}
+root.querySelectorAll('[data-setting]').forEach(el=>el.addEventListener('change',()=>{
+ cfg[el.dataset.setting]=el.value;
+ states.forEach(s=>Object.assign(s,{stage:'view',target:'enemy',help:false,message:''}));render();
+ if(window.openai?.setWidgetState)window.openai.setWidgetState({modelContent:{ability:cfg.ability,condition:cfg.condition,input:cfg.input},privateContent:null}).catch(()=>{});
+}));
+render();
+if(globalThis.Tweak){const t=new Tweak({container:root,onChange:render});t.addToggle(cfg,'day',{label:'Светлое поле'});t.addToggle(cfg,'dense',{label:'Плотная группа'});}
+})();
+</script>
+</div>
