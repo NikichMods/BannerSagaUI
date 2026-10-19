@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+/local/
+/build/
+/dist/
+/work/
+*.json.z
+*.swf
+*.fla
+*.exe
+*.dll
+*.sav
+*.zip
