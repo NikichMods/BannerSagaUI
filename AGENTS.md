@@ -6,7 +6,13 @@ Follow NikichMods/DevRules, beginning with WORKING_RULES.md and its action map; 
 
 The Banner Saga 1, Steam Windows, Russian UI clarity without rebalance. First inspected host: application 2.58.17, Steam build 3268685. Do not assume Factions or sequels share the current implementation. There is no separate shared host research repository yet.
 
-Read docs/RESEARCH.md, docs/UI_AUDIT.md and docs/CANDIDATES.md before implementation. Inspect actual Git state and local unpublished changes. Host assets/decompiled code/saves stay outside Git, including private repositories. Commit derived facts, hashes and original tools only.
+Start with docs/PROJECT.md for the goal, current position, open decisions and next-step rationale. Then read task-relevant sections of docs/RESEARCH.md, docs/UI_AUDIT.md, docs/CANDIDATES.md and docs/TEST_BUILD_LOG.md before implementation. Inspect actual Git state and local unpublished changes. Host assets/decompiled code/saves stay outside Git, including private repositories. Commit derived facts, hashes and original tools only.
+
+## Project continuity
+
+Maintain docs/PROJECT.md as the single current project map. At meaningful research, design or test boundaries, connect the result to the overall UI-clarity goal: what became known, what remains uncertain, which materially different options remain, and what next action is justified by the evidence. Explain important choices and their consequences in concise user-facing rationale; do not report only the latest isolated operation. Scale this to the decision; do not repeat the entire map after routine checks.
+
+Keep adopted decisions distinct from recommendations and hypotheses. Update the owning evidence/test documents and the affected current-map claims within the same working segment; do not create a transcript ledger or duplicate technical evidence. At resume, recover from the map and actual files; at handoff, preserve the smallest missing state and a concrete next step. Runtime proof, UX acceptance and stable promotion remain separate.
 
 ## Invariants
 
