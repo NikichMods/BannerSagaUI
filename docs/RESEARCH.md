@@ -48,6 +48,8 @@
 - game.gui.page.SagaOptionsPage.doBind привязывает Keyboard.ESCAPE к cmdfunc_esc; обработчик разбирает открытые вложенные настройки. game.gui.page.SaveLoadPage.doBind привязывает Esc/Back и B геймпада к cmdfunc_esc → guiSaveLoadClose, где учитываются открытие через профиль и _allowClose. Это контрпример общей жалобе «в меню Esc нет», но не доказательство работы во всех состояниях и окнах.
 - SagaOptionsPage при показе в бою может включать выход из обучения по SagaVar.VAR_TUTORIAL_SKIPPABLE. Условия установки переменной и применимость к первому обязательному обучению не прослежены: жалоба R02 не опровергнута одним наличием ветки.
 
+- Дополнительная контрпроверка D07: game.gui.page.BattleHudPageInput.bindAll регистрирует NUMBER_2 для cmd_ability и LEFT/RIGHT с модификаторами для cmd_interact_allies_prev/next и cmd_interact_enemies_prev/next. Это статическое наличие команд в нашей базе, не runtime-проверка всех состояний. SHA-256 экспорта .as: 2da796c7491c80a7c8110dad96c590b6a4e109f8536a01991977f883a3fc8b67.
+
 SHA-256 экспортированных .as: GuiSagaMarket a0ab6a38a5a730e945d16a465beebaf589c09ba5ab6756f83dbe910857371e73; SagaOptionsPage 84c255e1299cd0f59f3c8b2b9403ca626169e78584a9a66c088152a9d47bf4f4; SaveLoadPage 4c027ab530b89925f3e7d60b6657ec61f7ea6c3eec7ac1bd75bd59ba9c3c693c. Игровой код не переносится в репозиторий. Каталог: PROBLEM_CATALOGUE.md; свидетельства R01–R08, B01, W01: UI_SOURCES.md.
 
 ## Следующий развилочный эксперимент
