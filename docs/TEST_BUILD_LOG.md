@@ -4,7 +4,7 @@ Status: **installed, tooltip display verified by user screenshot; stable/UX acce
 
 Payload SHA-256: `15ff3725d3dca7bd07073a6afbfb7ea632625117da030d41ea750c607d4c5e6c` (185663 bytes).
 Original SHA-256: `f2e607c1a39377076913a4a04672139beaa514154499b9d024acccc07bfc3a96` (185662 bytes).
-Exact final source commit is in the frozen local manifest and candidate source archive. The initial research commit was d72543ab6f3dcda4eacfd53bc7a593a120f8f976; metadata documentation initially said Python 3.13, then was corrected to observed Python 3.12.14 before user handoff. This correction does not change the locale payload bytes.
+Exact final handed source commit: dc703c0b0b32dba426a6c2b0ae717e8de277a27f, recorded in the final candidate manifest and source archive. The earlier research commit was d72543ab6f3dcda4eacfd53bc7a593a120f8f976; intermediate manifests initially said Python 3.13, then final metadata was corrected to observed Python 3.12.14 before user handoff. Intermediate manifests are historical, not the final source identity. This correction does not change the locale payload bytes.
 
 - Five original-tool tests pass; two independent build invocations on the original locale yield the payload SHA above, zlib runtime 1.3.2.
 - Installed with game closed after verifying the original and payload SHA-256; verified exact backup outside the game assets and installed payload SHA-256.
