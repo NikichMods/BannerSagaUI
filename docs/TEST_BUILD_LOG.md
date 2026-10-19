@@ -12,6 +12,7 @@ Exact final source commit is in the frozen local manifest and candidate source a
 - Raw session snapshot hash at observation: b28950fb589a623a47be34590bfc8b98a3a31bb98312458f78323006a9c9d59f. Raw log contains private machine identifiers and stays local, not in Git.
 - Six save files before and after startup have identical SHA-256. This proves no change during this observed startup interval, not all future save compatibility.
 - Window capture repeatedly timed out, including a retry after the user closed the baseline game. One separate attempt reported user input. The timeout cause is unknown; no screenshot or observed tooltip is claimed.
-- User asked to check the red strength tooltip for the new sentence and clipping. Awaiting reply. Reverse installation procedure prepared; actual rollback/relaunch still pending because the host is open.
+- User requested an isolated test save before gameplay. With host closed, profile 0 was cloned byte-for-byte into previously absent profile 1; all 5 copied files match and the original 6-file tree including master is unchanged. Separate backup ZIP SHA-256: c34e039ba4f77f43f040649410ac110401df2e3bf52baa68cd97c7029f0ad5b8. No save content is in Git. User must verify the second profile in the UI before playing.
+- Closed-file rollback to the original locale SHA and reinstall of the same candidate SHA were both verified. No runtime relaunch after rollback is claimed. Candidate remains installed, host left closed. Tooltip display/clipping and profile recognition await user evidence.
 
 Candidate is installed; leave its identity intact while awaiting user evidence. Do not rebuild different payload bytes under this version or merge to stable merely because native loading succeeded.
