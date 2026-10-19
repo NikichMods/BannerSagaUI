@@ -4,7 +4,9 @@ Follow NikichMods/DevRules, beginning with WORKING_RULES.md and its action map; 
 
 ## Scope and evidence
 
-The Banner Saga 1, Steam Windows, Russian UI clarity without rebalance. First inspected host: application 2.58.17, Steam build 3268685. Do not assume Factions or sequels share the current implementation. There is no separate shared host research repository yet.
+The Banner Saga 1, Steam Windows: systematic UI/UX audit leading to an agreed set of improvements, with Russian as the first verified locale and no rebalance. Substantial screen/layout/interaction redesign is permitted when justified; preserve the artistic style without preserving inconvenient layout by default. First inspected host: application 2.58.17, Steam build 3268685. There is no separate shared host research repository yet.
+
+Derive product goals from the broad audit, not from the first technically easy patch. Include current TBS2/TBS3, official changes, professional criticism and direct player reports as comparative evidence. Do not assume later means better, a historical complaint remains current, or shared engine/class names prove compatibility. Check official backports before proposing one. See docs/UI_SOURCES.md and docs/SEQUEL_COMPARISON.md. User-owned sequel installations/assets are authorized research inputs; that does not settle distributable payload rights or permit game-owned content in Git.
 
 Start with docs/PROJECT.md for the goal, current position, open decisions and next-step rationale. Then read task-relevant sections of docs/RESEARCH.md, docs/UI_AUDIT.md, docs/CANDIDATES.md and docs/TEST_BUILD_LOG.md before implementation. Inspect actual Git state and local unpublished changes. Host assets/decompiled code/saves stay outside Git, including private repositories. Commit derived facts, hashes and original tools only.
 
