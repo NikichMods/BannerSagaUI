@@ -16,6 +16,6 @@ Preserve combat, progression, narrative uncertainty, saves, other languages and 
 
 main is stable; research/* holds research and unaccepted candidates. VERSION is the sole candidate version owner. Numbered handed artifacts are immutable, tied to the exact committed source and SHA-256. Runtime acceptance requires the user to see the changed Russian tooltip, verify legibility, preserved behavior and rollback. Do not promote static parsing/build success to runtime acceptance or publish a stable release before that acceptance.
 
-Build with Python 3.13 standard library: python tools/build.py --game-root <path> --out <empty-directory>. Test with python -m unittest discover -s tests. No host payload in distributed source bundles. Installation is a separate closed-game operation with verified backup and installed hash. No automated save edits or game termination.
+Build with Python standard library (verified 3.12.14): python tools/build.py --game-root <path> --out <empty-directory>. Test with python -m unittest discover -s tests. No host payload in distributed source bundles. Installation is a separate closed-game operation with verified backup and installed hash. No automated save edits or game termination.
 
 Original software is MPL-2.0; see LICENSING.md. No exception to DevRules.

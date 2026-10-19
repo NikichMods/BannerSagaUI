@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import subprocess
+import sys
 from pathlib import Path
 import zlib
 from amf3 import Reader, u29
@@ -53,7 +54,7 @@ def main():
     manifest['source_commit'] = source_commit
     manifest['resource'] = RELATIVE.as_posix()
     manifest['build_status'] = 'static-verified; runtime-unaccepted'
-    manifest['toolchain'] = 'Python 3.13 stdlib; zlib runtime recorded by version'
+    manifest['toolchain'] = 'Python ' + sys.version.split()[0] + ' stdlib'
     manifest['zlib_runtime'] = zlib.ZLIB_RUNTIME_VERSION
     args.out.mkdir(parents=True, exist_ok=False)
     dest = args.out/RELATIVE

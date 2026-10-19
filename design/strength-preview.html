@@ -1,0 +1,31 @@
+<div id="bsu-strength-preview" aria-label="Варианты пояснения силы">
+<style>
+#bsu-strength-preview{--bsu-paper:#e7dbbf;--bsu-ink:#292820;--bsu-scene:#26343b;--bsu-line:#97876a;--bsu-red:#a3332b;font-family:Georgia,'Times New Roman',serif;color:var(--bsu-ink)}
+#bsu-strength-preview .bsu-stage{min-height:285px;display:grid;align-items:center;justify-items:center;padding:26px 14px;background:var(--bsu-scene);box-sizing:border-box}
+#bsu-strength-preview .bsu-panel{box-sizing:border-box;width:min(100%,540px);background:var(--bsu-paper);border:1px solid var(--bsu-line);padding:22px 26px;box-shadow:0 5px 22px #0004}
+#bsu-strength-preview .bsu-kind{font:12px system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase;opacity:.75;margin-bottom:18px}
+#bsu-strength-preview h3{font-size:21px;font-weight:400;margin:0 0 16px;color:var(--bsu-red)}
+#bsu-strength-preview p{font-size:17px;line-height:1.45;margin:0}
+#bsu-strength-preview dl{display:grid;grid-template-columns:105px 1fr;gap:13px 16px;font-size:16px;line-height:1.4;margin:0}
+#bsu-strength-preview dt{font-weight:400;opacity:.8}#bsu-strength-preview dd{margin:0}
+#bsu-strength-preview .bsu-rule{height:1px;background:var(--bsu-line);margin:17px 0;opacity:.6}
+@media(max-width:430px){#bsu-strength-preview .bsu-stage{min-height:350px}#bsu-strength-preview .bsu-panel{padding:20px 17px}#bsu-strength-preview dl{grid-template-columns:1fr;gap:5px}#bsu-strength-preview dd{margin-bottom:9px}}
+</style>
+<div class="viz-carousel" aria-label="Способ подачи пояснения" data-previous-label="Предыдущий" data-next-label="Следующий">
+<section data-variant="Текстовая проба" aria-label="Содержание установленной пробы">
+<div class="bsu-stage"><div class="bsu-panel"><div class="bsu-kind">Содержание установленной пробы</div><h3>Сила</h3><p>Здоровье и основа урона воина. Потеря силы ослабляет обычную атаку. При 0 воин теряет сознание.</p></div></div>
+</section>
+<section data-variant="Карточка с иерархией" aria-label="Исследовательский вариант карточки" hidden>
+<div class="bsu-stage"><div class="bsu-panel"><div class="bsu-kind">Предложение для дальнейшего исследования</div><h3>Сила</h3><dl><dt>Что означает</dt><dd>Здоровье и основа урона воина</dd><dt>При потере</dt><dd>Обычная атака становится слабее</dd><dt>При нуле</dt><dd>Воин теряет сознание</dd></dl></div></div>
+</section>
+</div>
+</div>
+<script>
+(()=>{
+const root=document.getElementById('bsu-strength-preview');
+const settings={night:false,compact:false};
+function render(){root.style.setProperty('--bsu-paper',settings.night?'#222e32':'#e7dbbf');root.style.setProperty('--bsu-ink',settings.night?'#e7dbbf':'#292820');root.style.setProperty('--bsu-line',settings.night?'#64777a':'#97876a');root.style.setProperty('--bsu-red',settings.night?'#ff9b87':'#a3332b');root.querySelectorAll('.bsu-panel').forEach(p=>p.style.padding=settings.compact?'17px':'24px');}
+render();
+if(globalThis.Tweak){const tweak=new Tweak({container:root,onChange:render});tweak.addToggle(settings,'night',{label:'Тёмный фон'});tweak.addToggle(settings,'compact',{label:'Плотнее'});}
+})();
+</script>
