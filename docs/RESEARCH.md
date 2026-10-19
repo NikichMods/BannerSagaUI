@@ -50,6 +50,8 @@
 
 - Дополнительная контрпроверка D07: game.gui.page.BattleHudPageInput.bindAll регистрирует NUMBER_2 для cmd_ability и LEFT/RIGHT с модификаторами для cmd_interact_allies_prev/next и cmd_interact_enemies_prev/next. Это статическое наличие команд в нашей базе, не runtime-проверка всех состояний. SHA-256 экспорта .as: 2da796c7491c80a7c8110dad96c590b6a4e109f8536a01991977f883a3fc8b67.
 
+- Контрпроверка S01/S02: GuiPgDetails.checkDetailsItemVisible скрывает details_item при развёрнутом видимом promoteBanner (и других условиях); GuiPromoteBanner.onPromoteCrossClicked переключает extended и сохраняет предпочтение для героя. Поэтому проверять доступность функции без повышения и заметность сворачивания, не вводить новую механику экипировки. Hash экспортов: GuiPgDetails 47c1bb98e47e3f9fb3c940cec7191d37b61a1a983b33e8a892fbdb96eeea8d02; GuiPromoteBanner 42291372da8048af92cf45983439c7f924a047304d8ac08b3eddf2021abf93eb. Runtime-обнаружимость и точный hitbox не проверены.
+
 SHA-256 экспортированных .as: GuiSagaMarket a0ab6a38a5a730e945d16a465beebaf589c09ba5ab6756f83dbe910857371e73; SagaOptionsPage 84c255e1299cd0f59f3c8b2b9403ca626169e78584a9a66c088152a9d47bf4f4; SaveLoadPage 4c027ab530b89925f3e7d60b6657ec61f7ea6c3eec7ac1bd75bd59ba9c3c693c. Игровой код не переносится в репозиторий. Каталог: PROBLEM_CATALOGUE.md; свидетельства R01–R08, B01, W01: UI_SOURCES.md.
 
 ## Следующий развилочный эксперимент
