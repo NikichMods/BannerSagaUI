@@ -22,6 +22,12 @@ Keep adopted decisions distinct from recommendations and hypotheses. Update the 
 
 Preserve combat, progression, narrative uncertainty, saves, other languages and unrelated mods. Prefer existing data consumers over replacing SWF code. Each independent behavior needs the DevRules READY gate. A full locale-file hash guard is intentional for the first experiment: it prevents replacing another mod's shared locale file before coexistence is researched.
 
+## Development runtime
+
+Use the approved separate TBS1 development copy for subsequent mod installation, launches, logs and runtime tests; do not default to the personal Steam installation or its saves. See docs/DEVELOPMENT_ENVIRONMENT.md; machine paths and local manifests are in ignored local/RESUME.md. The development copy uses AIR application ID TheBannerSagaDev, independent save/settings files and the verified steam=false path. Steam may remain open on the tested configuration. Direct battle startup is not configured.
+
+Keep the development Steam bypass separate from the mod candidate: build the immutable candidate from a verified original input, preserve/reapply the separately verified development adaptation for local installation, record both hashes and update the launcher's integrity manifest only after verification. Do not overwrite the development SWF with a plain candidate or call the adapted file the unchanged numbered artifact. Close the target game before installation; use its own verified backup for rollback. Personal-game installation and Steam-connected acceptance require a separate explicit task. Development-menu startup does not accept combat UX or a stable release.
+
 ## Versions and acceptance
 
 main is stable; research/* holds research and unaccepted candidates. VERSION is the sole candidate version owner. Numbered handed artifacts are immutable, tied to the exact committed source and SHA-256. Runtime acceptance requires the user to see the changed Russian tooltip, verify legibility, preserved behavior and rollback. Do not promote static parsing/build success to runtime acceptance or publish a stable release before that acceptance.
