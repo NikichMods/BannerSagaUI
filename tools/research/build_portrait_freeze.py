@@ -46,13 +46,16 @@ def main():
     parser.add_argument('--input', type=Path, required=True)
     parser.add_argument('--baseline', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--standalone', action='store_true',
+                        help='Apply only the FPS change to the verified original')
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[2]
     if args.out.exists():
         raise ValueError('Output must not exist; frozen artifacts are immutable')
-    if sha(args.input) != INPUT_SHA:
-        raise ValueError('Expected immutable test.6 candidate, not installed DEV')
     baseline_sha = json.loads((root / 'data/baseline.json').read_text())['swf_sha256']
+    expected_input = baseline_sha if args.standalone else INPUT_SHA
+    if sha(args.input) != expected_input:
+        raise ValueError('Expected original baseline or immutable test.6, according to selected mode')
     if sha(args.baseline) != baseline_sha:
         raise ValueError('Original baseline hash mismatch')
     if subprocess.check_output(['git', '-C', str(root), 'status', '--porcelain'], text=True).strip():
@@ -86,7 +89,8 @@ def main():
     patched = unpacked.replace(body['raw'], changed_body, 1)
     args.out.mkdir(parents=True)
     version = (root / 'VERSION').read_text().strip()
-    payload = args.out / f'BannerSagaUI-{version}-PortraitFreeze.swf'
+    label = 'PortraitFreezeStandalone' if args.standalone else 'PortraitFreeze'
+    payload = args.out / f'BannerSagaUI-{version}-{label}.swf'
     encoded = zlib.compress(patched) if raw[:3] == b'CWS' else patched
     payload.write_bytes(raw[:4] + struct.pack('<I', len(patched) + 8) + encoded)
     report = compare(args.input, payload)
@@ -98,12 +102,14 @@ def main():
     assert change['changed_bodies'][0]['index'] == body['index']
     assert change['changed_bodies'][0]['metadata_equal']
     assert target(payload)[2]['raw'] == changed_body
-    assert sha(args.input) == INPUT_SHA
+    assert sha(args.input) == expected_input
     manifest = dict(version=version, source_commit=subprocess.check_output(
         ['git', '-C', str(root), 'rev-parse', 'HEAD'], text=True).strip(),
         source_dirty=False, payload=payload.name, sha256=sha(payload),
-        base_candidate_sha256=INPUT_SHA, original_sha256=baseline_sha,
-        scope='Research only: suppress hero-detail portrait animation update; retain test.6 diagnostics',
+        base_candidate_sha256=expected_input, original_sha256=baseline_sha,
+        standalone=args.standalone,
+        scope=('Standalone hero-detail portrait FPS workaround; no other mod changes'
+               if args.standalone else 'Research only: suppress hero-detail portrait animation update; retain test.6 diagnostics'),
         changed_class=CLASS, method='update', body_index=body['index'],
         code_offset=start, nop_bytes=len(seam), structural_comparison=report,
         runtime_verified=False, python=__import__('sys').version.split()[0])
