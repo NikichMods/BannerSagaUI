@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'/'research'))
 from analyze_ram_probe import analyze
-from build_ram_probe import canonical, verify_stock_branch
+from build_ram_probe import canonical, verify_stock_branch, verify_host_imports
 
 
 class ProbeComparisonTests(unittest.TestCase):
@@ -72,6 +72,18 @@ class ProbeComparisonTests(unittest.TestCase):
 
 
 class PcodePreservationTests(unittest.TestCase):
+    def test_wrong_import_package_is_rejected(self):
+        with self.assertRaises(ValueError):
+            verify_host_imports(['synthetic.wrong.Reason'], {'synthetic.correct.Reason'})
+
+    def test_runtime_import_and_exact_host_class_are_allowed(self):
+        verify_host_imports(['synthetic.correct.Reason', 'flash.utils.Dictionary'],
+                            {'synthetic.correct.Reason'})
+
+    def test_unknown_runtime_import_is_not_silently_allowed(self):
+        with self.assertRaises(ValueError):
+            verify_host_imports(['flash.unknown.NotVerified'], set())
+
     def test_labels_resolve_independently_of_offsets(self):
         left = canonical('getlocal0\niftrue ofs0010\npushfalse\nreturnvalue\nofs0010:\npushtrue\nreturnvalue\n',[])
         right = canonical('getlocal0\niftrue ofs0020\npushfalse\nreturnvalue\nofs0020:\npushtrue\nreturnvalue\n',[])

@@ -28,7 +28,7 @@ IMPORTS = [
     'engine.battle.ability.model.BattleAbility',
     'engine.battle.ability.model.BattleAbilityManager',
     'engine.battle.ability.model.BattleAbilityValidation',
-    'engine.battle.ability.model.AbilityReason',
+    'engine.battle.ability.effect.def.AbilityReason',
     'engine.battle.ability.effect.model.Effect',
     'engine.battle.ability.effect.model.EffectTag',
     'engine.battle.ability.effect.op.model.Op',
@@ -43,6 +43,15 @@ IMPORTS = [
     'engine.tile.def.TileRect', 'engine.tile.def.TileRectRange',
     'engine.tile.def.TileLocation', 'flash.utils.Dictionary',
 ]
+
+# This runtime-provided import is absent from the game's own ABC class table.
+RUNTIME_IMPORTS = {'flash.utils.Dictionary'}
+
+
+def verify_host_imports(imports, host_classes):
+    missing = set(imports) - set(host_classes) - RUNTIME_IMPORTS
+    if missing:
+        raise ValueError('Imports absent from the verified host: ' + ', '.join(sorted(missing)))
 
 
 def export(java, ffdec, source, out, classes, pcode=False):
@@ -197,10 +206,12 @@ def main():
     expected = json.loads((root / 'data/baseline.json').read_text())['swf_sha256']
     if hashlib.sha256(source.read_bytes()).hexdigest() != expected:
         raise ValueError('Only the verified original SWF may be used')
+    index = abcs(source)
+    verify_host_imports(IMPORTS, {name for _, abc in index for name in abc.classes})
     commit = subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
     dirty = bool(subprocess.check_output(['git','status','--porcelain'],cwd=root,text=True).strip())
     version = (root/'VERSION').read_text().strip() if args.freeze else 'development-unversioned'
-    if args.freeze and (dirty or args.compile_only or version in ('0.1.0-test.1','0.1.0-test.2','0.1.0-test.3')):
+    if args.freeze and (dirty or args.compile_only or version in ('0.1.0-test.1','0.1.0-test.2','0.1.0-test.3','0.1.0-test.4')):
         raise ValueError('Freeze requires clean committed source and a new VERSION')
     out.mkdir(parents=True)
     args.java, args.ffdec = args.java.resolve(), args.ffdec.resolve()
@@ -278,7 +289,6 @@ BODY
     edits = [(OVERLAY,name,markers[name],text) for name,text in hover.items()]
     edits += [(ABILITY,'getStatChange','public static function getStatChange(',calculation),
         (MANAGER,'onAbilityFinalComplete','public function onAbilityFinalComplete(',complete)]
-    index = abcs(source)
     replacements = []
     allowed = set()
     for classname,name,marker,text in edits:
@@ -301,6 +311,7 @@ BODY
         require_balanced(extract_method(script(out / 'result-pcode',classname,'.pcode'),marker))
     report['normal_getStatChange_instructions_and_exception_regions_equal'] = True
     report['bounded_stack_height_checks_passed'] = True
+    report['imported_host_classes_verified'] = True
     if hashlib.sha256(source.read_bytes()).hexdigest() != expected:
         raise ValueError('Source changed during build')
     manifest = {'scope':'research-only native armor and Shield Wall projection, diagnostic log only',

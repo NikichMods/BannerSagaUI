@@ -58,6 +58,8 @@ python tools/research/compare_swf.py <original.swf> <local-result.swf>
 
 [Документация FFDec, Editing ActionScript](https://github.com/jindrapetrik/jpexs-decompiler/wiki/Features#editing-actionscript) прямо называет прямое AS-редактирование experimental, а встроенный маршрут через Flex SDK — unstable (перепроверено 20.10.2026). Поэтому переход на пункт меню Flex сам по себе не решает проблему доверия к сборке. При росте собственного кода сравнить отдельно компиляцию собственного модуля подходящим AS3-компилятором и минимальное внедрение с текущим донорским маршрутом; проверять конкретный результат в целевом AIR. Такой альтернативный маршрут у нас ещё не проверен. Не обещать полную пересборку клиента: официальный Mod Content описывает исходные ассеты, а опубликованный Factions — исторический клиент другой игры/версии.
 
+В test.4 компилятор также пропустил несуществующий импорт AbilityReason: SWF собрался и вошёл в бой, но создание объекта в прогнозе дало ReferenceError #1065. Сверять игровые импорты с классами точного исходного ABC до компиляции; build_ram_probe.py теперь это делает. Проверка стека не доказывает разрешимость имён. Причина и тест — RESEARCH.md / TEST_BUILD_LOG.md.
+
 ### Работать с боевым предпросмотром
 
 Найти владельцев результата, вывода и применения отдельно. Сейчас прослежены BattleAbility/getStatChange, Op_BatteringRam, AbilityDestinationOverlay, BattleBoardController и BattleHudPage; подробности — COMBAT_EXAMPLES.md и RESEARCH.md.
