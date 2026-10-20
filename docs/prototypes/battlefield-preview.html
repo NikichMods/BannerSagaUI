@@ -1,0 +1,126 @@
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+<div id="bs-field-study">
+<style>
+#bs-field-study {--bf-floor:#39464b;--bf-bg:#1c2e35;--bf-text:#f4dfb5;--bf-edge:#77949c;--bf-aim:#bd9aff;--bf-blue:#6ccada;--bf-strength:#ffb99a;--bf-badge:#182a31;--bf-unit:#92725c;--bf-friend:#547e8b;font:16px/1.4 Georgia,serif;color:var(--bf-text)}
+#bs-field-study *{box-sizing:border-box}
+#bs-field-study .bf-controls {display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;color:var(--foreground)}
+#bs-field-study .bf-controls label{display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px}
+#bs-field-study select{font:inherit;padding:8px;background:var(--bf-bg);color:var(--bf-text);border:1px solid var(--bf-edge);width:100%}
+#bs-field-study .bf-scene{background:var(--bf-bg);border:1px solid var(--bf-edge);padding:12px}
+#bs-field-study .bf-title{font-size:19px;margin:0 95px 8px 0;font-weight:500;min-height:27px}
+#bs-field-study .bf-meta{font-size:13px;margin-bottom:10px;min-height:37px}
+#bs-field-study .bf-board{position:relative;background:var(--bf-floor);width:100%;height:450px;isolation:isolate;overflow:hidden}
+#bs-field-study .bf-map{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+#bs-field-study .bf-unit {position:absolute;transform:translate(-50%,-100%);background:none;border:0;color:var(--bf-text);font:inherit;padding:0;width:86px;height:114px;z-index:2;display:flex;align-items:center;justify-content:flex-end;flex-direction:column}
+#bs-field-study .bf-unit[data-id="caster"]{height:148px;width:94px}
+#bs-field-study .bf-figure{display:block;position:relative;height:70px;width:43px;flex:none;filter:drop-shadow(2px 5px 2px #17252b99)}
+#bs-field-study .bf-figure:before{content:'';position:absolute;width:24px;height:25px;border:2px solid #24333a;border-radius:42% 42% 30% 30%;background:#b9a08a;left:10px;top:0;z-index:2}
+#bs-field-study .bf-figure:after{content:'';position:absolute;inset:20px 0 0;background:var(--bf-unit);border:2px solid #24333a;clip-path:polygon(18% 0,80% 0,100% 88%,61% 100%,48% 88%,35% 100%,0 90%)}
+#bs-field-study [data-id="caster"] .bf-figure{height:101px;width:65px}
+#bs-field-study [data-id="caster"] .bf-figure:before{left:20px;width:30px;height:31px}
+#bs-field-study [data-id="caster"] .bf-figure:after{top:25px}
+#bs-field-study .bf-friend .bf-figure:after{background:var(--bf-friend)}
+#bs-field-study .bf-name{background:var(--bf-badge);padding:1px 5px;font-size:12px;white-space:nowrap;position:relative;z-index:4}
+#bs-field-study .bf-effect{position:absolute;top:-5px;left:50%;transform:translateX(-50%);background:var(--bf-badge);border-bottom:2px solid var(--bf-blue);padding:3px 6px;white-space:normal;width:max-content;max-width:180px;font-size:var(--bf-label-size,15px);pointer-events:none;z-index:5}
+#bs-field-study .bf-hit-strength .bf-effect{border-color:var(--bf-strength);color:var(--bf-strength)}
+#bs-field-study .bf-risk .bf-effect{border:2px solid var(--bf-strength);border-top:5px double var(--bf-strength);padding:2px 5px}
+#bs-field-study .bf-risk .bf-figure{filter:drop-shadow(2px 0 0 var(--bf-strength)) drop-shadow(-2px 0 0 var(--bf-strength))}
+#bs-field-study .bf-chosen .bf-figure{filter:drop-shadow(2px 0 0 var(--bf-aim)) drop-shadow(-2px 0 0 var(--bf-aim))}
+#bs-field-study .bf-ghost{pointer-events:none;z-index:1;opacity:1}
+#bs-field-study .bf-ghost .bf-figure{opacity:.52;filter:none}
+#bs-field-study .bf-ghost .bf-figure:after{background:transparent;border:3px dashed var(--bf-blue);clip-path:none;border-radius:35% 35% 12% 12%}
+#bs-field-study .bf-ghost .bf-figure:before{background:transparent;border:2px dashed var(--bf-blue)}
+#bs-field-study .bf-ghost .bf-name{color:var(--bf-blue);border-bottom:1px dashed var(--bf-blue)}
+#bs-field-study .bf-foot{display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:13px;margin-top:10px}
+#bs-field-study .bf-clear{font:inherit;background:var(--bf-badge);color:var(--bf-text);border:1px solid var(--bf-edge);padding:7px 10px}
+#bs-field-study .bf-live{margin-top:9px;min-height:40px;font-size:14px}
+#bs-field-study .bf-note{font-size:12px;margin-top:6px}
+#bs-field-study.bf-day{--bf-floor:#c3cecd;--bf-bg:#e7dfca;--bf-text:#1c383f;--bf-edge:#6a858a;--bf-badge:#eee6d3;--bf-blue:#076474;--bf-strength:#9c371e;--bf-aim:#7556b3;--bf-unit:#92725c;--bf-friend:#4f7984}
+@media(max-width:500px){#bs-field-study .bf-board{height:480px}#bs-field-study .bf-scene{padding:8px}#bs-field-study .bf-unit{width:70px;height:105px}#bs-field-study .bf-unit[data-id="caster"]{width:80px;height:134px}#bs-field-study .bf-effect{font-size:13px;white-space:normal;min-width:74px;max-width:110px;text-align:center}#bs-field-study .bf-title{margin-right:65px;font-size:17px;min-height:72px}#bs-field-study .bf-meta{min-height:80px}#bs-field-study .bf-live{min-height:80px}}
+</style>
+<div class="bf-controls" aria-label="Одинаковая ситуация для сравнения">
+ <label>Способность<select data-control="ability"><option value="ram">Таран · I</option><option value="tempest">Ураган · I</option></select></label>
+ <label>Расстановка<select data-control="scene"><option value="cross">Воин на пути</option><option value="clear">Свободный путь</option></select></label>
+</div>
+<div class="viz-carousel" aria-label="Штатные маркеры и полевое предложение" data-previous-label="Предыдущий" data-next-label="Следующий">
+ <section data-variant="Штатные маркеры · схема"><div class="bf-scene" data-view="stock" aria-label="Частичная реконструкция штатных маркеров"></div></section>
+ <section data-variant="Последствия на поле" hidden><div class="bf-scene" data-view="proposal" aria-label="Предложение полевого предпросмотра"></div></section>
+</div>
+<script>
+(()=>{
+const root=document.getElementById('bs-field-study');
+const state={ability:'ram',scene:'cross',first:'a',selected:true,day:false,labelSize:15};
+const controls={ability:root.querySelector('[data-control="ability"]'),scene:root.querySelector('[data-control="scene"]')};
+const panels=[...root.querySelectorAll('.bf-scene')];
+const NS='http://www.w3.org/2000/svg';
+function svgEl(type,attrs){const e=document.createElementNS(NS,type);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);return e;}
+function setScenes(){
+ const choices=state.ability==='ram'?[['cross','Воин на пути'],['clear','Свободный путь']]:[['friend','Союзник рядом'],['enemies','Только враги']];
+ controls.scene.replaceChildren(...choices.map(([v,t])=>new Option(t,v)));if(!choices.some(([v])=>v===state.scene))state.scene=choices[0][0];controls.scene.value=state.scene;controls.ability.value=state.ability;
+}
+function restore(data){const s=data?.modelContent;if(!s)return;if(['ram','tempest'].includes(s.ability))state.ability=s.ability;if(['cross','clear','friend','enemies'].includes(s.scene))state.scene=s.scene;if(['a','b','c'].includes(s.first))state.first=s.first;if(typeof s.selected==='boolean')state.selected=s.selected;}
+restore(window.openai?.widgetState);setScenes();
+function save(){if(window.openai?.setWidgetState)window.openai.setWidgetState({modelContent:{ability:state.ability,scene:state.scene,first:state.first,selected:state.selected},privateContent:null}).catch(()=>{});}
+function fixture(){
+ if(state.ability==='ram')return {caster:{id:'caster',x:0,y:2,size:2,friend:true,name:'Действует'},units:[{id:'a',x:2,y:2,size:1,name:'Цель'},...(state.scene==='cross'?[{id:'c',x:4,y:2,size:1,friend:true,name:'На пути'}]:[])],end:{x:6,y:2,size:1}};
+ return {caster:{id:'caster',x:2,y:2,size:2,friend:true,name:'Действует'},units:[{id:'a',x:4,y:2,size:1,name:'Враг А'},{id:'c',x:4,y:3,size:1,friend:state.scene==='friend',name:state.scene==='friend'?'Союзник':'Враг В'},{id:'b',x:3,y:4,size:1,name:'Враг Б'}]};
+}
+function targets(f){if(!state.selected)return [];if(state.ability==='ram')return [f.units[0]];const first=f.units.find(u=>u.id===state.first)||f.units[0];const angle=u=>Math.atan2(u.x+u.size/2-(f.caster.x+1),u.y+u.size/2-(f.caster.y+1));return [...f.units].sort((a,b)=>(((angle(first)-angle(a))%(2*Math.PI)+2*Math.PI)%(2*Math.PI))-(((angle(first)-angle(b))%(2*Math.PI)+2*Math.PI)%(2*Math.PI))).slice(0,2);}
+function render(){
+ const focused=document.activeElement?.closest('button.bf-unit');const focusId=focused?.dataset.id;const focusView=focused?.closest('.bf-scene')?.dataset.view;
+ root.classList.toggle('bf-day',state.day);root.style.setProperty('--bf-label-size',state.labelSize+'px');
+ const f=fixture(),ts=targets(f);
+ panels.forEach(panel=>{
+  const proposed=panel.dataset.view==='proposal';
+  if(!panel.firstChild){panel.innerHTML='<h3 class="bf-title"></h3><div class="bf-meta"></div><div class="bf-board"><svg class="bf-map" role="img" aria-label="Схема клеток и последствий"></svg></div><div class="bf-foot"><button type="button" class="bf-clear">Снять выбор · Esc</button><span>Нажмите фигуру · ← → смена первой цели</span></div><div class="bf-live" aria-live="polite"></div><div class="bf-note">Учебная расстановка; не игровой снимок. Имена — пояснения схемы. Нет числового прогноза урона.</div>';}
+  panel.querySelector('.bf-title').textContent=(state.ability==='ram'?'Таран':'Ураган')+' · '+(proposed?'предложение':'штатные маркеры, частичная схема');
+  panel.querySelector('.bf-meta').textContent=proposed?'Добавлены пометки последствий; геометрия и оформление условны.':'По коду TBS1 и осмотренным маркерам; полный экран и прочие слои не реконструированы.';
+  const board=panel.querySelector('.bf-board'),w=board.clientWidth||Math.max(280,root.clientWidth-26),h=board.clientHeight||450;
+  const columns=state.ability==='ram'?8:6,rows=6;
+  const cw=w<500?(w-60)/(state.ability==='ram'?8:6):Math.min(65,(w-52)/(columns+rows),(h-115)/((columns+rows)*.5)),ch=cw*.5;
+  const origin={x:w*(state.ability==='ram'?.44:.44),y:90};
+  const p=(x,y)=>({x:origin.x+(x-y)*cw,y:origin.y+(x+y)*ch});
+  const center=u=>p(u.x+u.size/2,u.y+u.size/2);
+  const svg=panel.querySelector('svg');svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.replaceChildren();
+  const defs=svgEl('defs',{}),mark=svgEl('marker',{id:'bf-arrow-'+panel.dataset.view,viewBox:'0 0 10 10',refX:8,refY:5,markerWidth:6,markerHeight:6,orient:'auto-start-reverse'});mark.append(svgEl('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'var(--bf-aim)'}));defs.append(mark);svg.append(defs);
+  function diamond(u,fill,stroke,dash){const pts=[p(u.x,u.y),p(u.x+u.size,u.y),p(u.x+u.size,u.y+u.size),p(u.x,u.y+u.size)].map(v=>v.x+','+v.y).join(' ');svg.append(svgEl('polygon',{points:pts,fill,stroke,'stroke-width':1.6,...(dash?{'stroke-dasharray':dash}:{})}));}
+  for(let x=0;x<columns;x++)for(let y=0;y<rows;y++)diamond({x,y,size:1},'transparent','var(--bf-edge)');
+  diamond(f.caster,'var(--bf-bg)','var(--bf-blue)');
+  f.units.forEach(u=>diamond(u,ts.some(t=>t.id===u.id)?'var(--bf-aim)':'var(--bf-bg)',ts.some(t=>t.id===u.id)?'var(--bf-aim)':'var(--bf-edge)'));
+  board.querySelectorAll('.bf-unit').forEach(el=>el.remove());
+  function unit(u,ghost=false){const pt=center(u),el=document.createElement(ghost?'div':'button');el.className='bf-unit'+(u.friend?' bf-friend':'')+(ghost?' bf-ghost':'');el.dataset.id=ghost?'ghost':u.id;if(!ghost){el.type='button';el.setAttribute('aria-label',u.name+(u.friend?' · свой':'')+(ts.some(t=>t.id===u.id)?' · затронут':''));el.setAttribute('aria-pressed',String(ts.some(t=>t.id===u.id)));}
+   el.style.left=pt.x+'px';el.style.top=(pt.y+12)+'px';el.innerHTML='<span class="bf-figure" aria-hidden="true"></span><span class="bf-name"></span>';el.querySelector('.bf-name').textContent=ghost?'Будет здесь':u.name;board.append(el);return el;}
+  const nodes={};[f.caster,...f.units].forEach(u=>nodes[u.id]=unit(u));
+  function label(node,text,cls){const e=document.createElement('span');e.className='bf-effect';e.textContent=text;node.append(e);if(cls)node.classList.add(cls);}
+  if(state.selected&&state.ability==='ram'){
+   const start=center(f.units[0]),end=center(f.end);
+   for(let n=0;n<4;n++){const a=center({x:2+n,y:2,size:1}),b=center({x:3+n,y:2,size:1});svg.append(svgEl('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:'var(--bf-aim)','stroke-width':3,'marker-end':`url(#bf-arrow-${panel.dataset.view})`}));}
+   if(proposed){diamond(f.end,'transparent','var(--bf-blue)','5 3');unit({...f.end,id:'ghost',name:'Будет здесь'},true);nodes.a.classList.add('bf-chosen');label(nodes.a,'Броня ↓');if(nodes.c)label(nodes.c,'+1 к урону цели');}
+  }
+  if(state.selected&&state.ability==='tempest'&&proposed){
+   ts.forEach((u,i)=>{
+    label(nodes[u.id],'Удар '+(i+1)+' · '+(u.friend?'Свой! ':'')+'Сила ↓','bf-hit-strength');if(u.friend)nodes[u.id].classList.add('bf-risk');else nodes[u.id].classList.add('bf-chosen');
+    const pt=center(u),laneX=Math.min(w-65,Math.max(...f.units.map(v=>center(v).x))+52),laneY=(w<500?310:80)+i*62;
+    const e=nodes[u.id].querySelector('.bf-effect');e.style.left=`calc(50% + ${laneX-pt.x}px)`;e.style.top=(laneY-(pt.y+12-(w<=500?105:114)))+'px';
+    svg.append(svgEl('line',{x1:pt.x,y1:pt.y-63,x2:laneX,y2:laneY+30,stroke:u.friend?'var(--bf-strength)':'var(--bf-aim)','stroke-width':1.5}));
+   });
+   if(ts.length===2){const a=center(ts[0]),b=center(ts[1]);svg.append(svgEl('path',{d:`M ${a.x} ${a.y+15} Q ${(a.x+b.x)/2+25} ${(a.y+b.y)/2+30} ${b.x} ${b.y+15}`,fill:'none',stroke:'var(--bf-aim)','stroke-width':3,'marker-end':`url(#bf-arrow-${panel.dataset.view})`}));}
+  }
+  const live=panel.querySelector('.bf-live');live.textContent=!state.selected?'Выбор снят. Можно выбрать цель снова.':proposed?(state.ability==='ram'?'Прямой эффект помечен у цели; контур показывает учебную позицию после отбрасывания.':'Порядок отмечен у фигур. Числа и цепные эффекты в этой схеме не рассчитаны.'):(state.ability==='ram'?'В штатном коде: подложка выбранной цели и стрелки пути отбрасывания.':'В штатном коде: подложки у всех выбранных целей; этот маркер общий для своих и врагов.');
+  panel.querySelector('.bf-clear').disabled=!state.selected;
+ });
+ if(focusId&&focusView)root.querySelector('.bf-scene[data-view="'+focusView+'"] button[data-id="'+focusId+'"]')?.focus({preventScroll:true});
+}
+function choose(id){if(id==='caster')return;if(state.ability==='ram'&&id!=='a')return;state.first=id;state.selected=true;render();save();}
+root.addEventListener('click',e=>{const unit=e.target.closest('button.bf-unit');if(unit)choose(unit.dataset.id);if(e.target.closest('.bf-clear')){state.selected=false;render();save();}});
+root.addEventListener('keydown',e=>{if(!e.target.closest('.bf-scene'))return;if(e.key==='Escape'){e.preventDefault();state.selected=false;render();save();}if(['ArrowLeft','ArrowRight'].includes(e.key)&&state.ability==='tempest'){e.preventDefault();const list=['a','c','b'];const n=list.indexOf(state.first);state.first=list[(n+(e.key==='ArrowRight'?1:2))%3];state.selected=true;render();save();}});
+controls.ability.addEventListener('change',()=>{state.ability=controls.ability.value;state.first='a';state.selected=true;setScenes();render();save();});
+controls.scene.addEventListener('change',()=>{state.scene=controls.scene.value;state.selected=true;render();save();});
+window.addEventListener('openai:set_globals',e=>{if(e.detail?.globals?.widgetState){restore(e.detail.globals.widgetState);setScenes();render();}});
+new ResizeObserver(()=>render()).observe(root);
+root.querySelectorAll('[data-variant]').forEach(v=>new MutationObserver(()=>render()).observe(v,{attributes:true,attributeFilter:['hidden']}));
+render();
+if(globalThis.Tweak){const t=new Tweak({container:root,onChange:render});t.addToggle(state,'day',{label:'Светлое поле'});t.addSlider(state,'labelSize',{label:'Размер пометок',min:14,max:18,step:1,unit:'px'});}
+})();
+</script>
+</div>
