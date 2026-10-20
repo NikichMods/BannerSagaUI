@@ -61,8 +61,9 @@ def main():
     if body['raw'] != target(args.baseline)[2]['raw']:
         raise ValueError('Portrait update no longer matches original game')
     def name_index(name):
-        matches = [i for i, (kind, _) in enumerate(abc.names)
-                   if kind in (7, 13) and abc.qname(i) == name]
+        matches = [i for i, (kind, values) in enumerate(abc.names)
+                   if kind == 7 and abc.qname(i) == name
+                   and abc.namespaces[values[0]][0] == 0x16]
         if len(matches) != 1:
             raise ValueError('Ambiguous public name: ' + name)
         return matches[0]
