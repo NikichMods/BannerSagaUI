@@ -39,6 +39,7 @@ IMPORTS = [
     'engine.battle.board.model.IBattleEntity',
     'engine.battle.board.model.IBattleMove',
     'engine.stat.def.StatType',
+    'engine.stat.model.Stats',
     'engine.tile.Tile', 'engine.tile.ITileResident',
     'engine.tile.def.TileRect', 'engine.tile.def.TileRectRange',
     'engine.tile.def.TileLocation', 'flash.utils.Dictionary',
@@ -211,7 +212,7 @@ def main():
     commit = subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
     dirty = bool(subprocess.check_output(['git','status','--porcelain'],cwd=root,text=True).strip())
     version = (root/'VERSION').read_text().strip() if args.freeze else 'development-unversioned'
-    if args.freeze and (dirty or args.compile_only or version in ('0.1.0-test.1','0.1.0-test.2','0.1.0-test.3','0.1.0-test.4')):
+    if args.freeze and (dirty or args.compile_only or version in ('0.1.0-test.1','0.1.0-test.2','0.1.0-test.3','0.1.0-test.4','0.1.0-test.5')):
         raise ValueError('Freeze requires clean committed source and a new VERSION')
     out.mkdir(parents=True)
     args.java, args.ffdec = args.java.resolve(), args.ffdec.resolve()

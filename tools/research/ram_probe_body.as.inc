@@ -59,6 +59,8 @@ var probeCleanupFailureValue:*;
 var probeFailed:Boolean = false;
 var probeCleanupFailed:Boolean = false;
 var probeStable:Boolean = true;
+var probeCacheRestored:Boolean = false;
+var probeCacheWasStale:Boolean = false;
 var probeEnd:Tile;
 // Snapshot actual results only when the normal manager has become idle.
 if(param4 == null)
@@ -124,9 +126,16 @@ try
             if(probeEntity == param5 && probeEffect.ability.def.id == "pas_returnthefavor")
                 throw new ArgumentError("unsupported:retaliating-target");
         }
-        probeSnapshots.push({entity:probeEntity, real:probeEntity.stats,
+        probeSnapshot = {entity:probeEntity, real:probeEntity.stats,
             stats:probeEntity.stats.clone(probeEntity), x:probeEntity.x, y:probeEntity.y,
-            effects:probeEntity.effects.effects.concat(), auraBefore:0, auraAfter:0});
+            effects:probeEntity.effects.effects.concat(), auraBefore:0, auraAfter:0};
+        // Native value equality omits modifier identity/state. Reject a clone
+        // that is not faithful before changing even the temporary stats.
+        for(probeX=0;probeX<probeEntity.stats.numStats;probeX++)
+            if(probeEntity.stats.getStatByIndex(probeX).getDebugStringMods("") !=
+                probeSnapshot.stats.getStatByIndex(probeX).getDebugStringMods(""))
+                throw new ArgumentError("unsupported:modifier-clone");
+        probeSnapshots.push(probeSnapshot);
     }
     probeInitial = probeManager.factory.fetchBattleAbilityDef("abl_batteringram_initial_arm_dam").getAbilityDefForLevel(param1.level) as BattleAbilityDef;
     probeFall = probeManager.factory.fetchBattleAbilityDef("abl_batteringram_fallthrough_arm_dam");
@@ -189,6 +198,26 @@ try
     probeExecutedId = probeManager.lastExecutedId;
     probeEntered = true;
     probeBoard.fake = true;
+    // Entity reuses its fake Stats. Native Stat.synchronizeFrom can leave an
+    // old modifier list while resetting values. Empty only the fake container
+    // through the public Stats API, so synchronizeFrom takes the clone path.
+    for each(probeSnapshot in probeSnapshots)
+    {
+        probeEntity = probeSnapshot.entity;
+        if(probeEntity.stats.numStats != probeSnapshot.stats.numStats) probeCacheWasStale = true;
+        else
+            for(probeX=0;probeX<probeEntity.stats.numStats;probeX++)
+                if(probeEntity.stats.getStatByIndex(probeX).getDebugStringMods("") !=
+                    probeSnapshot.stats.getStatByIndex(probeX).getDebugStringMods("")) probeCacheWasStale = true;
+        probeEntity.stats.synchronizeFrom(new Stats(probeEntity,false));
+        probeEntity.stats.synchronizeFrom(probeSnapshot.stats);
+        if(!probeEntity.stats.testEquals(probeSnapshot.stats,probeBoard.logger))
+            throw new Error("Fake stats initialization mismatch");
+        for(probeX=0;probeX<probeEntity.stats.numStats;probeX++)
+            if(probeEntity.stats.getStatByIndex(probeX).getDebugStringMods("") !=
+                probeSnapshot.stats.getStatByIndex(probeX).getDebugStringMods(""))
+                throw new Error("Fake modifier initialization mismatch");
+    }
     probeFakeRngCount = probeManager.rng.sampleCount;
     for(probeI=0;probeI<=probeRequests.length;probeI++)
     {
@@ -279,6 +308,30 @@ catch(probeFailure:*)
             probeCleanupFailed = true;
             probeCleanupFailureValue = probeCleanupFailure;
         }
+        // Leave the host's reusable fake cache with the original modifiers,
+        // including providers unrelated to Shield Wall. No live Stats change.
+        try
+        {
+            for each(probeSnapshot in probeSnapshots)
+            {
+                probeEntity = probeSnapshot.entity;
+                probeEntity.stats.synchronizeFrom(new Stats(probeEntity,false));
+                probeEntity.stats.synchronizeFrom(probeSnapshot.stats);
+                if(!probeEntity.stats.testEquals(probeSnapshot.stats,probeBoard.logger))
+                    throw new Error("Fake stats restoration mismatch");
+                for(probeX=0;probeX<probeEntity.stats.numStats;probeX++)
+                    if(probeEntity.stats.getStatByIndex(probeX).getDebugStringMods("") !=
+                        probeSnapshot.stats.getStatByIndex(probeX).getDebugStringMods(""))
+                        throw new Error("Fake modifier restoration mismatch");
+            }
+            probeCacheRestored = true;
+        }
+        catch(probeCacheFailure:*)
+        {
+            probeStable = false;
+            probeCleanupFailed = true;
+            probeCleanupFailureValue = probeCacheFailure;
+        }
         probeBoard.fake = false;
         if(probeManager.rng.sampleCount != probeRngCount ||
             probeManager.lastId != probeId || probeManager.lastExecutedId != probeExecutedId ||
@@ -292,6 +345,9 @@ catch(probeFailure:*)
                 probeEntity.effects.effects.length != probeSnapshot.effects.length) probeStable = false;
             for(probeI=0;probeI<probeSnapshot.effects.length;probeI++)
                 if(probeEntity.effects.effects[probeI] != probeSnapshot.effects[probeI]) probeStable = false;
+            for(probeX=0;probeX<probeEntity.stats.numStats;probeX++)
+                if(probeEntity.stats.getStatByIndex(probeX).getDebugStringMods("") !=
+                    probeSnapshot.stats.getStatByIndex(probeX).getDebugStringMods("")) probeStable = false;
         }
         if(probeBoard.fsm.turn != probeTurn || probeTurn.ability != probeTurnAbility || probeTurn.committed ||
             probeTurnAbility.targetSet.targets.length != probeTargets.length) probeStable = false;
@@ -302,7 +358,8 @@ catch(probeFailure:*)
 if(probeFailed) probeError = String(probeFailureValue);
 if(probeCleanupFailed) probeError += " cleanup=" + String(probeCleanupFailureValue);
 probeBoard.logger.info("BSUI_RAM_PROBE " + JSON.stringify({status:probeStatus,error:probeError,
-    restored:probeStable,entered:probeEntered,caster:param2.id,target:param5 ? param5.id : null,
+    restored:probeStable,cacheRestored:probeCacheRestored,cacheWasStale:probeCacheWasStale,
+    entered:probeEntered,caster:param2.id,target:param5 ? param5.id : null,
     level:param1.level,damageApplications:probeDamages,rows:probeRows}));
 if(!probeStable || probeStatus == "ERROR")
 {

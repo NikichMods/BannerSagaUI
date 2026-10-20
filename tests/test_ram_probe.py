@@ -40,6 +40,25 @@ class ProbeComparisonTests(unittest.TestCase):
         self.assertEqual(result['samples'][0]['status'],'MISMATCH')
         self.assertEqual(result['samples'][0]['differences'][0]['field'],'armor')
 
+    def test_latest_wrong_prediction_is_not_hidden_by_first_correct_one(self):
+        first,actual = self.scenario()
+        last = dict(first, rows=[dict(first['rows'][0], armor=6)])
+        result = analyze([self.record('BSUI_RAM_PROBE',first),
+            self.record('BSUI_RAM_PROBE',last),
+            'Execute [1 source->{synthetic} abl_batteringram/1]',
+            self.record('BSUI_RAM_IDLE',actual)])
+        self.assertEqual(result['comparable_sample_count'],1)
+        self.assertEqual(result['samples'][0]['prediction_line'],2)
+        self.assertEqual(result['samples'][0]['status'],'MISMATCH')
+
+    def test_explicit_failed_fake_cache_restoration_never_passes(self):
+        prediction,actual = self.scenario()
+        prediction['cacheRestored'] = False
+        result = analyze([self.record('BSUI_RAM_PROBE',prediction),
+            'Execute [1 source->{synthetic} abl_batteringram/1]',
+            self.record('BSUI_RAM_IDLE',actual)])
+        self.assertEqual(result['comparable_sample_count'],0)
+
     def test_unsupported_and_failed_restoration_never_pass(self):
         for status,restored in [('UNSUPPORTED',True),('UNVERIFIED',False),('ERROR',True)]:
             prediction,actual = self.scenario()

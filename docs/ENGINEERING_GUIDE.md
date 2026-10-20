@@ -60,6 +60,8 @@ python tools/research/compare_swf.py <original.swf> <local-result.swf>
 
 В test.4 компилятор также пропустил несуществующий импорт AbilityReason: SWF собрался и вошёл в бой, но создание объекта в прогнозе дало ReferenceError #1065. Сверять игровые импорты с классами точного исходного ABC до компиляции; build_ram_probe.py теперь это делает. Проверка стека не доказывает разрешимость имён. Причина и тест — RESEARCH.md / TEST_BUILD_LOG.md.
 
+TBS1 2.58.17: Entity переиспользует fake Stats через synchronizeFrom; исходный p-code Stat показывает проблемную синхронизацию списка модификаторов. Равные числовые значения и Stat.testEquals не доказывают равенство providers/charges. Test.5 дал первый правильный и последующие ошибочные прогнозы разрыва ауры. Узкий исследовательский обход в test.6 — заполнение очищенного fake-контейнера штатным clone-путём и восстановление кэша после просмотра; общий метод игры не патчится. Механизм и альтернативы — RESEARCH.md; runtime/приёмку проверять по TEST_BUILD_LOG.md.
+
 ### Работать с боевым предпросмотром
 
 Найти владельцев результата, вывода и применения отдельно. Сейчас прослежены BattleAbility/getStatChange, Op_BatteringRam, AbilityDestinationOverlay, BattleBoardController и BattleHudPage; подробности — COMBAT_EXAMPLES.md и RESEARCH.md.

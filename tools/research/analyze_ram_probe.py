@@ -15,7 +15,8 @@ def analyze(lines):
     for number, line in enumerate(lines, 1):
         if 'BSUI_RAM_PROBE ' in line:
             record = json.loads(line.split('BSUI_RAM_PROBE ',1)[1])
-            valid = record.get('status') == 'UNVERIFIED' and record.get('entered') is True and record.get('restored') is True
+            valid = (record.get('status') == 'UNVERIFIED' and record.get('entered') is True
+                     and record.get('restored') is True and record.get('cacheRestored', True) is True)
             pending = (number, record) if valid else None
             if not valid: skipped.append({'line':number,'status':record.get('status'),'error':record.get('error')})
         elif 'Execute [' in line:
