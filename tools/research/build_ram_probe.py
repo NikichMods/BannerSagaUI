@@ -16,6 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from build_ram_hover import command, extract_method, instructions, once, q, transform
 from abc_index import abcs, swf_tags, frame_header, Reader
+from check_pcode_stack import require_balanced
 
 DATA = 'engine.battle.ability.model.StatChangeData'
 ABILITY = 'engine.battle.ability.model.BattleAbility'
@@ -199,7 +200,7 @@ def main():
     commit = subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
     dirty = bool(subprocess.check_output(['git','status','--porcelain'],cwd=root,text=True).strip())
     version = (root/'VERSION').read_text().strip() if args.freeze else 'development-unversioned'
-    if args.freeze and (dirty or args.compile_only or version in ('0.1.0-test.1','0.1.0-test.2')):
+    if args.freeze and (dirty or args.compile_only or version in ('0.1.0-test.1','0.1.0-test.2','0.1.0-test.3')):
         raise ValueError('Freeze requires clean committed source and a new VERSION')
     out.mkdir(parents=True)
     args.java, args.ffdec = args.java.resolve(), args.ffdec.resolve()
@@ -230,6 +231,7 @@ BODY
     export(args.java, args.ffdec, donor_swf, out / 'donor-pcode', [DATA], True)
     probe = extract_method(script(out / 'donor-pcode', DATA, '.pcode'), 'public static function bsuiProbe(')
     (out / 'probe.pcode').write_text(probe, encoding='utf-8')
+    require_balanced(probe)
     print(json.dumps({'donor_compiled': True, 'pcode': str(out / 'probe.pcode'),
         'status': 'donor only; never install donor; not a numbered candidate'}))
     if args.compile_only:
@@ -253,6 +255,7 @@ BODY
     ability_text = script(out / 'host-pcode', ABILITY, '.pcode')
     old_calculation = extract_method(ability_text,'public static function getStatChange(')
     calculation = splice_probe(old_calculation,probe)
+    require_balanced(calculation)
     manager_text = script(out / 'host-pcode', MANAGER, '.pcode')
     complete = extract_method(manager_text,'public function onAbilityFinalComplete(')
     ns = 'engine.battle.ability.model:IBattleAbility'
@@ -271,6 +274,7 @@ BODY
         f'getproperty {q("INCOMPLETES_EMPTY")}')
     complete = once(complete, dispatch,idle+dispatch)
     complete = once(complete, 'maxstack 5\n','maxstack 8\n')
+    require_balanced(complete)
     edits = [(OVERLAY,name,markers[name],text) for name,text in hover.items()]
     edits += [(ABILITY,'getStatChange','public static function getStatChange(',calculation),
         (MANAGER,'onAbilityFinalComplete','public function onAbilityFinalComplete(',complete)]
@@ -293,7 +297,10 @@ BODY
     export(args.java,args.ffdec,payload,out / 'result-pcode',[ABILITY,MANAGER,OVERLAY],True)
     verify_stock_branch(old_calculation,extract_method(script(out / 'result-pcode',ABILITY,'.pcode'),
         'public static function getStatChange('))
+    for classname, name, marker, _ in edits:
+        require_balanced(extract_method(script(out / 'result-pcode',classname,'.pcode'),marker))
     report['normal_getStatChange_instructions_and_exception_regions_equal'] = True
+    report['bounded_stack_height_checks_passed'] = True
     if hashlib.sha256(source.read_bytes()).hexdigest() != expected:
         raise ValueError('Source changed during build')
     manifest = {'scope':'research-only native armor and Shield Wall projection, diagnostic log only',

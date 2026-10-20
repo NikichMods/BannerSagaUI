@@ -54,6 +54,10 @@ var probeTargets:Object = probeTurnAbility ? probeTurnAbility.targetSet.targets.
 var probeEntered:Boolean = false;
 var probeStatus:String = "UNVERIFIED";
 var probeError:String = "";
+var probeFailureValue:*;
+var probeCleanupFailureValue:*;
+var probeFailed:Boolean = false;
+var probeCleanupFailed:Boolean = false;
 var probeStable:Boolean = true;
 var probeEnd:Tile;
 // Snapshot actual results only when the normal manager has become idle.
@@ -251,12 +255,17 @@ try
     if(probeManager.rng.sampleCount != probeFakeRngCount)
         throw new Error("Fake RNG consumed");
 }
-catch(probeFailure:Error)
+catch(probeFailure:*)
 {
-    probeError = probeFailure.toString();
+    // Defer formatting until after fake-mode restoration. Catch all thrown
+    // values, including values that are not Error instances.
+    probeFailed = true;
+    probeFailureValue = probeFailure;
     probeStatus = probeFailure is ArgumentError ? "UNSUPPORTED" : "ERROR";
 }
-finally
+// There are no early exits in the calculation try/catch. Both paths reach
+// cleanup; its catch only stores data before restoring the board. Do not nest
+// handlers inside finally: FFDec 26.4.0 loses the outer stack discriminator.
 {
     if(probeEntered)
     {
@@ -264,15 +273,13 @@ finally
         {
             for each(probeOp in probeOps) probeOp.remove();
         }
-        catch(probeCleanupFailure:Error)
+        catch(probeCleanupFailure:*)
         {
             probeStable = false;
-            probeError += " cleanup=" + probeCleanupFailure;
+            probeCleanupFailed = true;
+            probeCleanupFailureValue = probeCleanupFailure;
         }
-        finally
-        {
-            probeBoard.fake = false;
-        }
+        probeBoard.fake = false;
         if(probeManager.rng.sampleCount != probeRngCount ||
             probeManager.lastId != probeId || probeManager.lastExecutedId != probeExecutedId ||
             probeManager.numIncompleteAbilities != 0) probeStable = false;
@@ -292,6 +299,8 @@ finally
             if(probeTurnAbility.targetSet.targets[probeI] != probeTargets[probeI]) probeStable = false;
     }
 }
+if(probeFailed) probeError = String(probeFailureValue);
+if(probeCleanupFailed) probeError += " cleanup=" + String(probeCleanupFailureValue);
 probeBoard.logger.info("BSUI_RAM_PROBE " + JSON.stringify({status:probeStatus,error:probeError,
     restored:probeStable,entered:probeEntered,caster:param2.id,target:param5 ? param5.id : null,
     level:param1.level,damageApplications:probeDamages,rows:probeRows}));
