@@ -1,5 +1,15 @@
 # Испытания кандидатов BannerSagaUI
 
+## Штатный Needle baseline на неизменной test.10 —21.10.2026
+
+Пользователь передал четыре кадра до/после двух применений NeedleI и сообщил о двух fly-text−1 (броня/сила) во втором кадре, одно число перекрыто текущим stat-флагом. Предметный разбор и SHA четырёх исходных PNG — COMBAT_EXAMPLES.md. Это native baseline, не новая версия/числовая MATCH-проверка нашего provider: test.10 Needle не рассчитывает.
+
+Сохранён завершённый DEV-сеанс21.10 16:47:04–16:51:18МСК, TBS1 application2.58.17; сначала загружен profile_index2, затем profile_index1, откуда выполнен btl_training. Native Execute11: `alette→[egil] abl_threadtheneedle/1`; Execute21: `alette→[egil,fighter_raider_a] abl_threadtheneedle/1`. Между ними Execute13 `egil→egil abl_stonewall/1`. Оба Needle завершены, один ATTACHED/один DISPOSE, штатный exitTimerCompleteHandler. BSUI_FIELD_BEGIN/RESULT/SHOWN для Needle отсутствуют(0): новый числовой provider не был запущен. В snapshot не найдены VerifyError/TypeError/ReferenceError/RangeError; три ERROR относятся к news(2) и SceneAudioEmitterAudible(1), их не выдавать за ошибки нового Needle-кода, которого нет.
+
+Installed SHA-256 повторно `54a7a4604e648398f72bebfc466bc845bf9f18b000e0882e30acebb8c48e0649`, прежняя test.10/source7cbb0e8. Log snapshot49129байт, SHA-256 `b02701aeec0be675163598cf4ba74e71e32f33969e80a1b88f12cf130efefa0c`; originals/manifest/analysis сохранены только в ignored local, путь в local/RESUME.md. Агент не запускал/не завершал игру, не устанавливал SWF и не правил save. Побайтовая неизменность сохранений за пользовательский игровой сеанс здесь не заявляется.
+
+Baseline подтверждает доступность NeedleI в DEV, один союзный target и смешанный targetSet из2фигур. Первый случай исправляет прежний универсальный enemy-endpoint вывод по cacheInRanges; см. COMBAT_EXAMPLES/ABILITY_COVERAGE. Для второй линии нет отдельной читаемой пары статов промежуточного Эгиля, полного MATCH всех фигур не заявлять. Скрытие fly-text текущим флагом — отдельное наблюдение читаемости. Повтор того же baseline не нужен; test.10 остаётся текущей установкой, новый provider/изменённый дизайн не принимались.
+
 
 
 
