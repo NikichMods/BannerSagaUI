@@ -108,9 +108,12 @@ package bannersagaui.preview {
                 if (!def || def.id != "abl_threadtheneedle" || def.level < 1 || def.level > 3 ||
                     def.effects.length != 2 || def.effects[0].ops.length != 0 ||
                     def.effects[0].persistent || def.effects[1].persistent ||
-                    def.effects[1].ops.length != 2 || def.effects[1].tags.length != 0)
+                    def.effects[1].ops.length != 2)
                     throw new ArgumentError("unsupported:definition");
                 var damageDef:IEffectDef = def.effects[1];
+                // Native tags is a Dictionary, not the serialized data's array.
+                for each (var definitionTag:EffectTag in damageDef.tags)
+                    throw new ArgumentError("unsupported:definition-tags");
                 var strParams:Object = damageDef.ops[0].params;
                 var armParams:Object = damageDef.ops[1].params;
                 if (damageDef.ops[0].id.name != "DAMAGE_STR" ||
