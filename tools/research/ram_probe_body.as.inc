@@ -34,7 +34,10 @@ var probeRequest:Object;
 var probeRow:Object;
 var probeRows:Array = [];
 var probeKey:String;
-var probeAllowed:String = "|pas_shieldwall|abl_shieldwall_bonus|abl_shieldwall_bonus_self|pas_light_step|pas_puncture|pas_returnthefavor|";
+// Heavy Impact requires a completed effect tagged DAMAGED_STR. The bounded
+// requests below accept only ARMOR operations; the no-armor guard also excludes
+// native ChangeStat's fallback to STRENGTH. See the scoped evidence in RESEARCH.
+var probeAllowed:String = "|pas_shieldwall|abl_shieldwall_bonus|abl_shieldwall_bonus_self|pas_light_step|pas_puncture|pas_returnthefavor|pas_heavyimpact|";
 var probeDamages:int = 0;
 var probeI:int;
 var probeX:int;
