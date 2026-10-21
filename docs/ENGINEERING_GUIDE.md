@@ -12,6 +12,7 @@
 | Проверить технический вывод, эксперимент, точную базу и ограничения | [RESEARCH.md](RESEARCH.md) |
 | Найти правило способности, потребителя UI и факты настоящего кадра | [COMBAT_EXAMPLES.md](COMBAT_EXAMPLES.md) |
 | Найти типы последствий/источники предпросмотра TBS1 и границы fake для следующей способности | [ABILITY_COVERAGE.md](ABILITY_COVERAGE.md) |
+| Решить, пригодна ли пара amount/other штатного getStatChange для прямых потерь Needle | [RESEARCH.md: проверка источника](RESEARCH.md#needle-пригодность-штатного-источника-прямых-изменений-21102026): реальные TBS1 исключения fake, отрицательная сила, ошибки/cleanup и условия reaction labels |
 | Сравнить версии трилогии и уже проверенные классы | [SEQUEL_COMPARISON.md](SEQUEL_COMPARISON.md) |
 | Найти документацию/инструмент и понять его происхождение | [RESEARCH.md: инструменты и происхождение](RESEARCH.md#инструменты-и-происхождение) |
 | Узнать точную установленную/испытанную сборку и порядок отката | [CANDIDATES.md](CANDIDATES.md), [TEST_BUILD_LOG.md](TEST_BUILD_LOG.md) |
