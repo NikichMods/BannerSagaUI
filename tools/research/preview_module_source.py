@@ -67,3 +67,97 @@ BODY
 }
 }
 '''.replace('IMPORTS', imports).replace('BODY', body)
+
+
+def needle_controller_source(source):
+    """Optional research-only query. Keep default sources/Ram output unchanged.
+
+    Selected targets only; no click/hover reconstruction, new graphic, or use
+    of loss values as PreviewFrame final stats. Log output is evidence only.
+    """
+    source = once(source, 'import engine.battle.ability.model.BattleAbility;',
+        'import engine.battle.ability.model.BattleAbility;\n'
+        '    import engine.battle.ability.model.BattleAbilityEvent;\n'
+        '    import engine.battle.ability.effect.model.Effect;\n'
+        '    import engine.battle.ability.effect.model.EffectTag;\n'
+        '    import engine.stat.def.StatType;')
+    source = once(source, 'private var failed:Boolean = false;',
+        'private var failed:Boolean = false;\n'
+        '        private var needleAction:BattleAbility;\n'
+        '        private var needleResult:Object;')
+    source = once(source, 'var result:Object = RamPreviewProvider.calculate(ability.def, ability.caster, target);',
+        '''if (ability.def.id == "abl_threadtheneedle") {
+                var needle:Object = NeedlePreviewProbe.calculate(ability);
+                board.logger.info("BSUI_NEEDLE_QUERY " + JSON.stringify(needle));
+                clearNeedleObservation();
+                if (needle.status == "ready") {
+                    needleAction = ability; needleResult = needle;
+                    needleAction.addEventListener(BattleAbilityEvent.ABILITY_AND_CHILDREN_COMPLETE, needleCompleted);
+                }
+                return {status:needle.status == "error" ? "error" : "unsupported",
+                    reason:"needle-query-log-only", restored:needle.restored,
+                    cacheRestored:needle.cacheRestored, rows:[]};
+            }
+            var result:Object = RamPreviewProvider.calculate(ability.def, ability.caster, target);''')
+    source = once(source,
+        'if (ability && ability.def.targetRule == BattleAbilityTargetRule.SPECIAL_BATTERING_RAM) {',
+        '''if (ability && ability.def.id == "abl_threadtheneedle" && ability.targetSet.targets.length) {
+                target = ability.targetSet.targets[ability.targetSet.targets.length-1];
+            } else if (ability && ability.def.targetRule == BattleAbilityTargetRule.SPECIAL_BATTERING_RAM) {''')
+    source = once(source, 'private function onDirty(event:Event):void {',
+        '''private function onDirty(event:Event):void {
+            // A selected-only Needle query is independent of pointer position.
+            if (event.type == BattleBoardEvent.HOVER_TILE && ability &&
+                ability.def.id == "abl_threadtheneedle" && ability.targetSet.targets.length) return;''')
+    source = once(source, 'private function dispose():void {', '''
+        private function clearNeedleObservation():void {
+            if (needleAction) needleAction.removeEventListener(
+                BattleAbilityEvent.ABILITY_AND_CHILDREN_COMPLETE, needleCompleted);
+            needleAction = null; needleResult = null;
+        }
+        private function needleCompleted(event:BattleAbilityEvent):void {
+            if (!needleAction || event.ability !== needleAction) return;
+            var action:BattleAbility = needleAction;
+            var prediction:Object = needleResult;
+            clearNeedleObservation();
+            if (board.fake || action.fake || !action.executed) return;
+            try {
+                var actual:Array = [];
+                var matches:Boolean = action.def.level == prediction.level &&
+                    action.targetSet.targets.length == prediction.rows.length;
+                var resistanceMatches:Boolean = true;
+                var index:int = 0;
+                for each (var row:Object in prediction.rows) {
+                    var entity:IBattleEntity = board.getEntity(row.id);
+                    if (!entity || entity.stats == null) throw new Error("Missing actual target");
+                    var armor:int = entity.stats.getValue(StatType.ARMOR);
+                    var strength:int = entity.stats.getValue(StatType.STRENGTH);
+                    if (armor != row.armorAfter || strength != row.strengthAfter ||
+                        index >= action.targetSet.targets.length ||
+                        action.targetSet.targets[index].id != row.id) matches = false;
+                    var resistedArmor:Boolean = false;
+                    var resistedStrength:Boolean = false;
+                    for each (var nativeEffect:Effect in action.effects) {
+                        if (nativeEffect.target && nativeEffect.target.id == row.id) {
+                            resistedArmor = resistedArmor || nativeEffect.hasTag(EffectTag.RESISTING_ARMOR);
+                            resistedStrength = resistedStrength || nativeEffect.hasTag(EffectTag.RESISTING_STRENGTH);
+                        }
+                    }
+                    if (resistedArmor != row.resistedArmor || resistedStrength != row.resistedStrength)
+                        resistanceMatches = false;
+                    actual.push({id:row.id, armor:armor, strength:strength,
+                        armorLoss:row.armorBefore-armor, strengthLoss:row.strengthBefore-strength,
+                        resistedArmor:resistedArmor, resistedStrength:resistedStrength});
+                    index++;
+                }
+                board.logger.info("BSUI_NEEDLE_ACTUAL " + JSON.stringify({
+                    status:matches && resistanceMatches ? "MATCH" : "MISMATCH",
+                    statsMatch:matches, resistanceMatch:resistanceMatches, caster:action.caster.id,
+                    level:action.def.level, rows:actual, prediction:prediction.rows}));
+            } catch (failure:*) {
+                board.logger.error("BSUI_NEEDLE_ACTUAL_ERROR " + String(failure));
+            }
+        }
+        private function dispose():void {
+            clearNeedleObservation();''')
+    return source

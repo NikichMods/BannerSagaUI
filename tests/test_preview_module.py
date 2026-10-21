@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools/research'))
-from preview_module_source import kernel, once, provider_source, ROW_EXTENSION
+from preview_module_source import kernel, once, provider_source, needle_controller_source, ROW_EXTENSION
 from compile_preview import test_swf as make_test_swf, validate_imports
 from build_field_preview import add_abc, hooks
 from abc_index import swf_tags
@@ -27,6 +27,24 @@ class PreviewModuleTests(unittest.TestCase):
         for source in ['', 'x x']:
             with self.assertRaises(ValueError):
                 once(source, 'x', 'y')
+
+    def test_optional_needle_probe_is_log_only_and_observer_is_action_scoped(self):
+        original = (ROOT / 'src/bannersagaui/preview/FieldPreview.as').read_text(encoding='utf-8')
+        modified = needle_controller_source(original)
+        self.assertNotIn('NeedlePreviewProbe', original)
+        self.assertIn('BSUI_NEEDLE_QUERY', modified)
+        self.assertIn('reason:"needle-query-log-only"', modified)
+        self.assertIn('needleAction.addEventListener(BattleAbilityEvent.ABILITY_AND_CHILDREN_COMPLETE', modified)
+        self.assertIn('needleAction.removeEventListener(', modified)
+        self.assertIn('event.ability !== needleAction', modified)
+        self.assertIn('clearNeedleObservation();', modified.split('private function dispose():void {')[1])
+        self.assertEqual(original[original.index('private function locate('):original.index('private function update(')],
+                         modified[modified.index('private function locate('):modified.index('private function update(')])
+
+    def test_needle_controller_refuses_changed_source_seam(self):
+        original = (ROOT / 'src/bannersagaui/preview/FieldPreview.as').read_text(encoding='utf-8')
+        with self.assertRaises(ValueError):
+            needle_controller_source(original.replace('private var failed:Boolean = false;', ''))
 
     def test_missing_native_import_rejected(self):
         with self.assertRaises(ValueError):

@@ -87,7 +87,7 @@ def main():
         raise ValueError('Expected original host and new output outside game')
     manifest = json.loads((module_dir / 'manifest.json').read_text(encoding='utf-8'))
     module = module_dir / 'preview.abc'
-    if (manifest['mode'] != 'native-module' or manifest['host_sha256'] != HOST_SHA256 or
+    if (manifest['mode'] not in ['native-module', 'native-needle-probe'] or manifest['host_sha256'] != HOST_SHA256 or
         manifest['outputs']['preview.abc'] != sha(module)):
         raise ValueError('Expected verified native-module ABC')
     root = Path(__file__).resolve().parents[2]
@@ -123,7 +123,8 @@ def main():
         path = out / (name + '.pcode')
         path.write_text(text, encoding='utf-8')
         replacement.extend([CLASS, path, indices[name]])
-    output = out / ('BannerSagaUI-' + version + '-FieldPreview.swf')
+    label = 'FieldPreview-NeedleProbe' if manifest['mode'] == 'native-needle-probe' else 'FieldPreview'
+    output = out / ('BannerSagaUI-' + version + '-' + label + '.swf')
     command(java, ffdec, '-replace', assembled, output, *replacement, cwd=out)
     report = compare(assembled, output)
     if not report['frame_header_equal'] or len(report['changed_tags']) != 1:
