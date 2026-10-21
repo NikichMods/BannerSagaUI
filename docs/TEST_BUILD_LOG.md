@@ -347,3 +347,15 @@ Candidate is installed; leave its identity intact while awaiting user evidence. 
 - Current native log records GameConfig.loadSaga profile_index=[1], save_id=[resume], followed by save/saga1/1/resume.save.json. The test profile is loaded and used for autosave.
 - All five original profile-0 files still match the pre-test backup SHA-256. Shared master/settings are outside this per-profile guarantee.
 - This establishes real display and test-profile operation, not explicit user acceptance for stable promotion, general resolution coverage, or all tooltip consumers.
+
+
+## test.11 — Needle log-only probe, установлен в DEV 21.10.2026
+
+Source **bebff3e39d19ff94b53de800d9cfa62411240f77**, VERSION0.1.0-test.11, research/ui-clarity. Отдельная исследовательская проверка прямых потерь Needle и native resistance tags; новых чисел на экране Needle нет. Обычный Ram provider/kernel/Frame/Session/Layer прежние; исходный обычный native-module повторно даёт byte-exact ABC test.10. Производственный охват/дизайн не расширены.
+
+- Immutable `BannerSagaUI-0.1.0-test.11-FieldPreview-NeedleProbe.swf`: SHA-256 **7558512f34f6047a9f0558b551de48bd01af7131ef6b0f0dc9cc502d6dd3dcbe**. Независимая повторная компиляция шестиклассового ABC и повторная frozen сборка совпали побайтово. Module SHA **b3d87649e6e1b58025cca1bf7d25b632c2b4eac4a56e9b0f18d8d266faabd0f2**.
+- 42 Python tests passed; 49 методов собственного ABC и прежние ScenePage update1828/cleanup1784 прошли ограниченный stack-height check без issues. Проверены сохранение native старых pools/traits/signatures/остальных тел и own ABC после hooks. Это не runtime verifier/числовая приёмка.
+- DEV-composition **0edea0f7e891071b87d5a1a6e11d05ed4617ed90988c1d42c5f71269fcb8bcee**,43674197bytes. От plain отличаются только SteamEntry599 и portrait18301, оба byte-exact установленной test.10; состав установлен и хеш назначения сверён. Launch-Dev CheckOnly passed, игру не запускали. 13личных и19DEV save/settings файлов неизменны.
+- Перед заменой сохранены проверенные SWF test.10 **54a7a4604e648398f72bebfc466bc845bf9f18b000e0882e30acebb8c48e0649** и согласованный dev-manifest. Backup `test.11-20261021-143943Z` (полный машинный путь local/RESUME.md). Откат при закрытой игре восстанавливает оба файла, затем CheckOnly. Immutable test.10 не изменена.
+
+Метод/guards/событие независимого чтения — RESEARCH.md; короткий проход — CANDIDATES.md test.11. Ожидается выбранная линия → ready QUERY/restored/cacheRestored → ACTUAL MATCH по всем target ids, потерям и resistance tags. Unsupported требует разбора причины, не повторов вслепую. Первый native baseline test.10 уже получен, его не надо доказывать заново. **Новая test.11 ещё не запущена пользователем; MATCH/стоимость/отсутствие runtime-сбоев пока не получены.** main/stable не менялись. Экспорты/сырые журналы/игровые SWF остаются ignored local.
