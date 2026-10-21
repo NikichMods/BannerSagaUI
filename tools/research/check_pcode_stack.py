@@ -44,6 +44,7 @@ def check(text):
         elif op in ('callproperty','callpropvoid','constructprop','callsuper','callsupervoid','callproplex'):
             pop=1+int(a.rsplit(',',1)[1])+runtime;push=0 if op.endswith('void') else 1
         elif op in ('construct','applytype'):pop=1+int(a);push=1
+        elif op=='newclass':pop=push=1
         elif op=='constructsuper':pop=1+int(a)
         elif op=='call':pop=2+int(a);push=1
         elif op=='newobject':pop=2*int(a);push=1

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<application xmlns="http://ns.adobe.com/air/application/29.0">
+  <id>NikichMods.BannerSagaUI.ContractTests</id>
+  <filename>BSUIContractTests</filename>
+  <name>BannerSagaUI isolated contract tests</name>
+  <versionNumber>0.0.1</versionNumber>
+  <initialWindow>
+    <content>PreviewContractTests.swf</content>
+    <visible>false</visible>
+    <width>800</width><height>600</height>
+    <renderMode>cpu</renderMode>
+  </initialWindow>
+  <supportedProfiles>extendedDesktop</supportedProfiles>
+</application>

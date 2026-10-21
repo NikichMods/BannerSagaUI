@@ -42,6 +42,11 @@ class StackHeightTests(unittest.TestCase):
     def test_unknown_opcode_is_rejected(self):
         with self.assertRaises(ValueError): require_balanced(method('unsupported_op\n'))
 
+    def test_class_definition_consumes_base_and_returns_class(self):
+        require_balanced(method('pushnull\nnewclass 0\npop\nreturnvoid\n', limit=1))
+        with self.assertRaises(ValueError):
+            require_balanced(method('newclass 0\nreturnvalue\n'))
+
 
 if __name__ == '__main__':
     unittest.main()
