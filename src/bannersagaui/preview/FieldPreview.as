@@ -38,6 +38,7 @@ package bannersagaui.preview {
         public function FieldPreview(owner:ScenePage, model:BattleBoard, visual:BattleBoardView) {
             page = owner; board = model; view = visual;
             page.addChild(layer);
+            board.logger.info("BSUI_FIELD_ATTACHED");
         }
 
         public static function updatePage(page:ScenePage):void {
@@ -79,6 +80,7 @@ package bannersagaui.preview {
             subscriptions = [];
         }
         private function onDirty(event:Event):void {
+            if (last) board.logger.info("BSUI_FIELD_CLEAR event=" + event.type);
             session.invalidate(); layer.clear(); last = null;
         }
         private function onTopology(event:Event):void {
@@ -109,6 +111,8 @@ package bannersagaui.preview {
         }
 
         private function calculate():Object {
+            board.logger.info("BSUI_FIELD_BEGIN caster=" + ability.caster.id +
+                " target=" + target.id + " level=" + ability.def.level);
             var result:Object = RamPreviewProvider.calculate(ability.def, ability.caster, target);
             // Research evidence only; not the data transport to the renderer.
             board.logger.info("BSUI_FIELD_RESULT " + JSON.stringify(result));
@@ -148,10 +152,14 @@ package bannersagaui.preview {
                 layer.y = page.height / 2 + (view.layerSprite.y + board.def.pos.y) * scale;
             }
             if (frame !== last) {
+                if (frame) board.logger.info("BSUI_FIELD_SHOWN target=" + frame.targetId +
+                    " count=" + frame.rows.length);
+                else if (last) board.logger.info("BSUI_FIELD_CLEAR context");
                 layer.show(frame, locate); last = frame;
             } else if (frame) layer.updatePositions(locate);
         }
         private function dispose():void {
+            board.logger.info("BSUI_FIELD_DISPOSE");
             unwatch(); session.dispose(); layer.clear();
             if (layer.parent) layer.parent.removeChild(layer);
             last = null; target = null; ability = null;

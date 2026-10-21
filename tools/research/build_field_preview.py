@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MPL-2.0
-"""Build an UNNUMBERED, uninstalled native field-preview research SWF.
+"""Build an uninstalled native field-preview research SWF.
 
 Consumes compile_preview's isolated own ABC, preserves Ram hover, adds only
 ScenePage update/cleanup calls. No game launch, installation or DEV adaptation.
@@ -78,6 +78,7 @@ def main():
     parser.add_argument('--ffdec', type=Path, required=True, help='ffdec-cli.jar')
     parser.add_argument('--module-dir', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True, help='Must not exist')
+    parser.add_argument('--freeze', action='store_true', help='Numbered candidate from clean committed source')
     args = parser.parse_args()
     game, java, ffdec, module_dir, out = [p.resolve() for p in
                                         (args.game_root, args.java, args.ffdec, args.module_dir, args.out)]
@@ -90,6 +91,13 @@ def main():
         manifest['outputs']['preview.abc'] != sha(module)):
         raise ValueError('Expected verified native-module ABC')
     root = Path(__file__).resolve().parents[2]
+    commit = subprocess.check_output(['git', '-C', str(root), 'rev-parse', 'HEAD'], text=True).strip()
+    dirty = bool(subprocess.check_output(['git', '-C', str(root), 'status', '--porcelain'], text=True).strip())
+    if args.freeze and dirty:
+        raise ValueError('Commit source before freezing a numbered candidate')
+    version = (root / 'VERSION').read_text().strip() if args.freeze else 'development-unversioned'
+    if args.freeze and not re.fullmatch(r'\d+\.\d+\.\d+-test\.\d+', version):
+        raise ValueError('Expected research test version')
     for path, expected in {**manifest['sources'], **manifest['generator_inputs']}.items():
         if sha(root / path) != expected:
             raise ValueError('Source changed since module compilation: ' + path)
@@ -115,7 +123,7 @@ def main():
         path = out / (name + '.pcode')
         path.write_text(text, encoding='utf-8')
         replacement.extend([CLASS, path, indices[name]])
-    output = out / 'BannerSagaUI-development-unversioned-FieldPreview.swf'
+    output = out / ('BannerSagaUI-' + version + '-FieldPreview.swf')
     command(java, ffdec, '-replace', assembled, output, *replacement, cwd=out)
     report = compare(assembled, output)
     if not report['frame_header_equal'] or len(report['changed_tags']) != 1:
@@ -157,7 +165,8 @@ def main():
         raise ValueError('Missing own method exports')
     if sha(source) != HOST_SHA256:
         raise ValueError('Original input changed')
-    record = {'status': 'research; unnumbered; NOT installed or game-runtime accepted',
+    record = {'status': 'research; NOT installed or game-runtime accepted',
+              'version': version, 'source_commit': commit, 'source_dirty': dirty,
               'payload': output.name, 'sha256': sha(output), 'original_sha256': HOST_SHA256,
               'module_sha256': sha(module), 'module_tag': module_tag, 'hook_body_indices': indices,
               'hook_comparison': report, 'hook_stack_checks': checks,
