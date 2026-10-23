@@ -28,15 +28,19 @@ class PreviewModuleTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 once(source, 'x', 'y')
 
-    def test_optional_needle_probe_is_log_only_and_observer_is_action_scoped(self):
+    def test_optional_needle_probe_is_log_only_and_manager_observer_filters_identity(self):
         original = (ROOT / 'src/bannersagaui/preview/FieldPreview.as').read_text(encoding='utf-8')
         modified = needle_controller_source(original)
         self.assertNotIn('NeedlePreviewProbe', original)
         self.assertIn('BSUI_NEEDLE_QUERY', modified)
         self.assertIn('reason:"needle-query-log-only"', modified)
-        self.assertIn('needleAction.addEventListener(BattleAbilityEvent.ABILITY_AND_CHILDREN_COMPLETE', modified)
-        self.assertIn('needleAction.removeEventListener(', modified)
+        self.assertIn('needleDispatcher.addEventListener(BattleAbilityEvent.ABILITY_AND_CHILDREN_COMPLETE', modified)
+        self.assertIn('needleDispatcher.removeEventListener(', modified)
         self.assertIn('event.ability !== needleAction', modified)
+        self.assertIn('BSUI_NEEDLE_OBSERVER_ARM', modified)
+        self.assertIn('BSUI_NEEDLE_OBSERVER_EVENT', modified)
+        self.assertIn('BSUI_NEEDLE_OBSERVER_PENDING', modified)
+        self.assertIn('readNeedleActual(action, prediction);', modified)
         self.assertIn('clearNeedleObservation();', modified.split('private function dispose():void {')[1])
         self.assertEqual(original[original.index('private function locate('):original.index('private function update(')],
                          modified[modified.index('private function locate('):modified.index('private function update(')])
