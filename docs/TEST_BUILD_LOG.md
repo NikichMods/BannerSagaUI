@@ -390,3 +390,14 @@ Session00:13:22–00:20:02МСК; snapshot local/evidence/needle-test12-20261023
 Точечный source lookup выявил ошибку null-контракта: native Stat.getDebugStringMods возвращает null, если _mods отсутствует/пуст (оригинальный p-code: pushnull/returnvalue). Новый charged-stat guard безусловно вызывал .indexOf у результата. Это доказанный дефект, достаточный для TypeError#1009; стек конкретного падения test.12 не сохранён, поэтому точная инструкция не является отдельным runtime-наблюдением. Guard исправлен на mods && mods.indexOf; отсутствие modifiers разрешено, заряды по-прежнему запрещены. Формулы/cleanup/охват не изменены. Добавлены stage и failureStack (когда Error.getStackTrace доступен), чтобы следующий отказ не оставлял только общий номер ошибки.
 
 Исправление и диагностика отдельно скомпилированы: local/needle-probe/null-mods-fix/preview.abc SHA5e97b05bf3866ba3f7f0d2b0e0332aa81ceadb82050c0ba3b2ba34aad57eaa1e. **Не установлены, VERSION остаётся test.12; frozen test.12 неизменна.** Для передачи нужен следующий номерной кандидат. Повторять test.12 или общий baseline не нужно; следующая проверка должна установить, что запрос действительно дошёл до расчёта и независимого ACTUAL. Успех после null-fix пока не доказан.
+
+
+## test.13 — null-safe modifier guard, DEV-установка 24.10.2026
+
+Source **10e6f26f5506f63ee0f5e3d11f7899b8afc10137**, VERSION0.1.0-test.13. Изменения относительно test.12: null-safe getDebugStringMods guard и stage/failureStack диагностика. Формулы/cleanup/охват/экран прежние; критерий — ready QUERY и независимый ACTUAL всех целей, сценарий CANDIDATES.md test.13.
+
+Immutable `BannerSagaUI-0.1.0-test.13-FieldPreview-NeedleProbe.swf` SHA-256 **a56c4f984883199dd6e5b1989f619a910fa93989a853e3dc2b76ab9f9e739bdc**; повторная frozen сборка совпала. Переиспользован compiled ABC SHA5e97b05bf3866ba3f7f0d2b0e0332aa81ceadb82050c0ba3b2ba34aad57eaa1e с актуальными source hashes. Только own DoABC tag3672 отличается от plain test.12; native tags побайтово прежние. Stack-height checks49own методов/2hooks без issues. Полный старый Python/AIR/Ram набор не повторяли: инструменты/контракты не менялись.
+
+DEV SHA **9fe6d13031958f2d2e8dbcd46aeeb0bb8457eb6dade8657fd568fd7ef020c6d4**,43674502bytes, установлен и сверён. SteamEntry599/portrait18301 byte-exact предыдущей DEV. Backup `test.13-20261023-212730Z` сохраняет test.12 SWF43561b585f47d54773be95669330eeebb8abaa088cad2762b3521078de2e534f и согласованный manifest; точные пути local/RESUME.md. CheckOnly passed; 14личных/19DEV save/settings неизменны. Игра автоматически не запускалась/не завершалась. Рабочая test.10 и прежние immutable кандидаты сохранены.
+
+**Игровой проход test.13 ещё не выполнен; MATCH не получен.** Успешная установка не доказывает преодоление всех guards или числовую правильность. Достаточны одиночный выстрел и линия с краткой задержкой подтверждения, штатный выход; журнал агент читает самостоятельно. main/stable не менялись.
