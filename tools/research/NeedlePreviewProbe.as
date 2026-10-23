@@ -92,6 +92,7 @@ package bannersagaui.preview {
             var status:String = "unsupported";
             var failure:* = null;
             var cleanupFailure:* = null;
+            var stage:String = "request";
             var liveRng:int;
             var fakeRng:int;
             var liveId:int;
@@ -105,6 +106,7 @@ package bannersagaui.preview {
                     throw new ArgumentError("unsupported:turn");
                 if (turn.move && !turn.move.executed && turn.move.numSteps > 1)
                     throw new ArgumentError("unsupported:pending-move");
+                stage = "definition";
                 if (!def || def.id != "abl_threadtheneedle" || def.level < 1 || def.level > 3 ||
                     def.effects.length != 2 || def.effects[0].ops.length != 0 ||
                     def.effects[0].persistent || def.effects[1].persistent ||
@@ -126,6 +128,7 @@ package bannersagaui.preview {
                     throw new ArgumentError("unsupported:ops");
                 if (selected.targetSet.tiles.length || selected.targetSet.targets.length == 0)
                     throw new ArgumentError("unsupported:select-line-first");
+                stage = "targets";
                 for each (entity in selected.targetSet.targets) {
                     if (!entity || seen[entity] || entity.board !== board || !entity.alive ||
                         !entity.attackable || !entity.stats.hasStat(StatType.ARMOR))
@@ -137,14 +140,17 @@ package bannersagaui.preview {
                     targets.push(entity);
                 }
                 for each (entity in board.entities) {
+                    stage = "entity-guards:" + entity.id;
                     rejectStats(entity);
                     if (entity.effects.hasTag(EffectTag.HAS_DAMAGE_RECOURSE_TARGET))
                         throw new ArgumentError("unsupported:damage-recourse");
                     // Exact-build diagnostic format is used only as a fail-closed
                     // research guard; no public modifier iterator exists here.
-                    for (i = 0; i < entity.stats.numStats; i++)
-                        if (entity.stats.getStatByIndex(i).getDebugStringMods("").indexOf(" charges=") >= 0)
+                    for (i = 0; i < entity.stats.numStats; i++) {
+                        var mods:String = entity.stats.getStatByIndex(i).getDebugStringMods("");
+                        if (mods && mods.indexOf(" charges=") >= 0)
                             throw new ArgumentError("unsupported:charged-stat");
+                    }
                     for each (effect in entity.effects.effects) {
                         if (ALLOWED.indexOf("|" + effect.ability.def.id + "|") < 0)
                             throw new ArgumentError("unsupported:effect:" + effect.ability.def.id);
@@ -158,6 +164,7 @@ package bannersagaui.preview {
                             if (existingOp.def.id.name == "INT_STAT_MOD" && existingOp.def.params.charges != 0)
                                 throw new ArgumentError("unsupported:charged-modifier");
                     }
+                    stage = "snapshot:" + entity.id;
                     snapshot = {entity:entity, real:entity.stats, stats:entity.stats.clone(entity),
                         x:entity.x, y:entity.y, effects:entity.effects.effects.concat(), alive:entity.alive};
                     if (!sameStats(entity.stats, snapshot.stats, board))
@@ -167,6 +174,7 @@ package bannersagaui.preview {
                 liveRng = manager.rng.sampleCount;
                 liveId = manager.lastId; liveExecuted = manager.lastExecutedId;
                 incomplete = manager.numIncompleteAbilities;
+                stage = "fake";
                 entered = true; board.fake = true;
                 for each (snapshot in snapshots) resetFake(snapshot, board);
                 fakeRng = manager.rng.sampleCount;
@@ -241,7 +249,8 @@ package bannersagaui.preview {
             if (failure != null && restored && failure is ArgumentError && reason.indexOf("unsupported:") >= 0)
                 status = "unsupported";
             if (!restored) status = "error";
-            return {status:status, reason:reason,
+            return {status:status, reason:reason, stage:stage,
+                failureStack:failure is Error ? Error(failure).getStackTrace() : null,
                 cleanup:cleanupFailure == null ? "" : String(cleanupFailure),
                 entered:entered, restored:restored, cacheRestored:cacheRestored,
                 caster:caster.id, target:targets.length ? targets[targets.length-1].id : null,
