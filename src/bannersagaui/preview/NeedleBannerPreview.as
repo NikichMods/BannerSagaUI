@@ -4,7 +4,6 @@ package bannersagaui.preview {
     import engine.battle.board.model.IBattleEntity;
     import engine.battle.entity.model.BattleEntityEvent;
     import engine.gui.IGuiBattleInfoFlag;
-    import engine.core.locale.LocaleCategory;
     import flash.display.MovieClip;
     import flash.display.Sprite;
     import flash.filters.GlowFilter;
@@ -14,6 +13,8 @@ package bannersagaui.preview {
     import flash.text.TextFormat;
     import flash.utils.Dictionary;
     import game.gui.page.ScenePage;
+    import game.gui.GuiIcon;
+    import game.gui.GuiIconLayoutType;
 
     /** Shared research UI. The historical class name preserves the native hook. */
     public final class NeedleBannerPreview {
@@ -22,6 +23,7 @@ package bannersagaui.preview {
         private var board:BattleBoard;
         private var frame:PreviewFrame;
         private var labels:Array = [];
+        private var icons:Array = [];
 
         public function NeedleBannerPreview(owner:ScenePage, model:BattleBoard) {
             page = owner; board = model;
@@ -58,6 +60,9 @@ package bannersagaui.preview {
             for each (var label:Object in labels)
                 if (label.sprite.parent) label.sprite.parent.removeChild(label.sprite);
             labels = [];
+            var pending:Array = icons;
+            icons = [];
+            for each (var icon:GuiIcon in pending) icon.release();
         }
 
         public function show(value:PreviewFrame):void {
@@ -135,11 +140,19 @@ package bannersagaui.preview {
             text.mouseEnabled = false; text.selectable = false;
             text.defaultTextFormat = new TextFormat("_sans", 12, 0xF4CA75);
             text.autoSize = TextFieldAutoSize.LEFT;
-            text.text = page.config.gameGuiContext.translateCategory("pas_shieldwall", LocaleCategory.ABILITY) +
-                " " + PreviewFrame.changeText(row.auraBefore, row.auraAfter);
+            text.text = PreviewFrame.changeText(row.auraBefore, row.auraAfter);
             var centre:Number = (armor.x + armor.width / 2 + strength.x + strength.width / 2) / 2;
-            text.x = centre - text.width / 2;
-            text.y = Math.max(armor.y + armor.height, strength.y + strength.height) - 6;
+            var top:Number = Math.max(armor.y + armor.height, strength.y + strength.height) - 6;
+            var left:Number = centre - (22 + 3 + text.width) / 2;
+            var icon:GuiIcon = page.config.gameGuiContext.getIcon(
+                "common/ability/icon/icon_shieldwall.promotion.png");
+            icons.push(icon);
+            icon.mouseEnabled = icon.mouseChildren = false;
+            icon.layout = GuiIconLayoutType.CENTER_FIT;
+            icon.setTargetSize(22, 22);
+            icon.x = left; icon.y = top;
+            parent.addChild(icon);
+            text.x = left + 25; text.y = top + 3;
             text.filters = [new GlowFilter(0x000000, 1, 2, 2, 4)];
             parent.addChild(text);
         }

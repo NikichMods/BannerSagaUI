@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 package bannersagaui.preview {
     import engine.battle.ability.def.BattleAbilityDef;
+    import engine.battle.ability.def.BattleAbilityTargetRule;
     import engine.battle.ability.effect.def.AbilityReason;
     import engine.battle.ability.effect.def.IEffectDef;
     import engine.battle.ability.effect.model.Effect;
@@ -154,7 +155,13 @@ package bannersagaui.preview {
                     for each (effect in entity.effects.effects) {
                         if (ALLOWED.indexOf("|" + effect.ability.def.id + "|") < 0)
                             throw new ArgumentError("unsupported:effect:" + effect.ability.def.id);
-                        if (seen[entity] && effect.ability.def.id == "pas_returnthefavor")
+                        // The real monitor uses ENEMY from the passive caster's
+                        // POV before considering damage tags or its response.
+                        // Allied fire cannot trigger it; keep the hostile case
+                        // guarded until its direct/annotation contract is proved.
+                        if (seen[entity] && effect.ability.def.id == "pas_returnthefavor" &&
+                            BattleAbilityTargetRule.ENEMY.isValid(effect.ability.caster,
+                                effect.ability.caster.rect, caster, null, true, null, false))
                             throw new ArgumentError("unsupported:reaction-annotation");
                         // Heavy Impact watches its owner's outgoing STR attack,
                         // not another archer's hit on that owner (casterRule SELF).
