@@ -4,16 +4,18 @@ package bannersagaui.preview {
     import engine.battle.board.model.IBattleEntity;
     import engine.battle.entity.model.BattleEntityEvent;
     import engine.gui.IGuiBattleInfoFlag;
+    import engine.core.locale.LocaleCategory;
     import flash.display.MovieClip;
     import flash.display.Sprite;
     import flash.filters.GlowFilter;
     import flash.geom.Rectangle;
     import flash.text.TextField;
+    import flash.text.TextFieldAutoSize;
     import flash.text.TextFormat;
     import flash.utils.Dictionary;
     import game.gui.page.ScenePage;
 
-    /** Research UI: native flags retain their own stats, layout and transforms. */
+    /** Shared research UI. The historical class name preserves the native hook. */
     public final class NeedleBannerPreview {
         private static var policies:Dictionary = new Dictionary(true);
         private var page:ScenePage;
@@ -87,23 +89,27 @@ package bannersagaui.preview {
                     throw new Error("Native stat text fields unavailable");
                 var sprite:Sprite = new Sprite();
                 sprite.mouseEnabled = sprite.mouseChildren = false;
-                sprite.name = "bsui_needle_delta";
+                sprite.name = "bsui_stat_delta";
                 addDelta(sprite, clip, armor["textField"] as TextField,
-                    match.armorBefore - match.armor, 0x8FD2FF);
+                    match.armorBefore, match.armor, 0x8FD2FF);
                 addDelta(sprite, clip, strength["textField"] as TextField,
-                    match.strengthBefore - match.strength, 0xFFA591);
+                    match.strengthBefore, match.strength, 0xFFA591);
+                if (match.auraBefore != match.auraAfter) addAura(sprite, match);
                 clip.addChild(sprite);
                 labels.push({clip:clip, sprite:sprite});
                 board.logger.info("BSUI_NEEDLE_LABEL " + JSON.stringify({id:match.id,
                     parent:clip.name, armorLoss:match.armorBefore-match.armor,
                     strengthLoss:match.strengthBefore-match.strength,
+                    armorChange:match.armor-match.armorBefore,
+                    strengthChange:match.strength-match.strengthBefore,
+                    auraChange:match.auraAfter-match.auraBefore,
                     armorX:sprite.getChildAt(0).x, strengthX:sprite.getChildAt(1).x,
                     y:sprite.getChildAt(0).y}));
             }
         }
 
         private function addDelta(parent:Sprite, clip:MovieClip, current:TextField,
-            loss:int, color:uint):void {
+            before:int, after:int, color:uint):void {
             var bounds:Rectangle = current.getBounds(clip);
             var format:TextFormat = current.getTextFormat();
             format.size = Number(format.size) + 2;
@@ -118,7 +124,23 @@ package bannersagaui.preview {
             text.x = bounds.x + (bounds.width - text.width) / 2;
             text.y = bounds.bottom - 2;
             text.filters = [new GlowFilter(0x000000, 1, 2, 2, 4)];
-            text.text = loss == 0 ? "0" : "-" + loss;
+            text.text = PreviewFrame.changeText(before, after);
+            parent.addChild(text);
+        }
+
+        private function addAura(parent:Sprite, row:Object):void {
+            var armor:TextField = parent.getChildAt(0) as TextField;
+            var strength:TextField = parent.getChildAt(1) as TextField;
+            var text:TextField = new TextField();
+            text.mouseEnabled = false; text.selectable = false;
+            text.defaultTextFormat = new TextFormat("_sans", 12, 0xF4CA75);
+            text.autoSize = TextFieldAutoSize.LEFT;
+            text.text = page.config.gameGuiContext.translateCategory("pas_shieldwall", LocaleCategory.ABILITY) +
+                " " + PreviewFrame.changeText(row.auraBefore, row.auraAfter);
+            var centre:Number = (armor.x + armor.width / 2 + strength.x + strength.width / 2) / 2;
+            text.x = centre - text.width / 2;
+            text.y = Math.max(armor.y + armor.height, strength.y + strength.height) - 6;
+            text.filters = [new GlowFilter(0x000000, 1, 2, 2, 4)];
             parent.addChild(text);
         }
 

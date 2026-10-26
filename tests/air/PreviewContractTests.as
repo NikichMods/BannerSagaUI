@@ -81,6 +81,8 @@ package bannersagaui.tests {
             check(NeedleObservationMatch.reason(request,candidate) == "target-state", "changed target cannot bind");
         }
         private function run():void {
+            check(PreviewFrame.changeText(9, 7) == "-2" && PreviewFrame.changeText(7, 9) == "+2" &&
+                PreviewFrame.changeText(9, 9) == "0", "loss gain and zero use unambiguous signed deltas");
             var protectedRow:Object = row("protected"); protectedRow.armor = protectedRow.armorBefore;
             var line:Object = result([protectedRow, row()]); line.allTargets = true;
             check(PreviewFrame.fromResult(line, "target").rows.length == 2,

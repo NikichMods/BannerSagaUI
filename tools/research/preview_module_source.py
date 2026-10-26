@@ -272,3 +272,19 @@ def needle_ui_controller_source(source):
     source = once(source, 'unwatch(); session.dispose(); layer.clear();',
                   'unwatch(); session.dispose(); needleBanners.dispose(); layer.clear();')
     return source
+
+
+def banner_ui_controller_source(source):
+    """Use the accepted native-banner UI for the unchanged Ram provider too."""
+    source = needle_ui_controller_source(source)
+    source = once(source, '''if (ability && ability.def.id == "abl_threadtheneedle") {
+                needleBanners.show(frame); layer.clear(); last = null; return;
+            }''', '''if (ability && (ability.def.id == "abl_threadtheneedle" ||
+                ability.def.targetRule == BattleAbilityTargetRule.SPECIAL_BATTERING_RAM)) {
+                // An abandoned, unexecuted Needle request must not outlive a
+                // switch to Ram. Keep any already-bound real execution observer.
+                if (ability.def.id != "abl_threadtheneedle" && !needleAction)
+                    clearNeedleObservation();
+                needleBanners.show(frame); layer.clear(); last = null; return;
+            }''')
+    return source

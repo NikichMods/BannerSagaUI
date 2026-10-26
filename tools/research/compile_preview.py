@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 from abc_index import ABC, abcs
-from preview_module_source import provider_source, needle_controller_source, needle_ui_controller_source
+from preview_module_source import provider_source, needle_controller_source, needle_ui_controller_source, banner_ui_controller_source
 
 HOST_SHA256 = '7d24a5910b9a0b3dfdae21443e3f0b7edd2510d6269d8407b6d0d31a5178a317'
 ROOT = Path(__file__).resolve().parents[2]
@@ -59,7 +59,7 @@ def main():
     parser.add_argument('--jvm', type=Path, required=True, help='Java 17 JVM library')
     parser.add_argument('--jpype-dir', type=Path, help='Optional private pip --target directory')
     parser.add_argument('--out', type=Path, required=True, help='New/empty local output directory')
-    parser.add_argument('--mode', choices=['contract-tests', 'native-module', 'native-needle-probe', 'native-needle-ui'], required=True)
+    parser.add_argument('--mode', choices=['contract-tests', 'native-module', 'native-needle-probe', 'native-needle-ui', 'native-banner-ui'], required=True)
     args = parser.parse_args()
     host, ffdec, jvm, out = [p.resolve() for p in (args.host, args.ffdec, args.jvm, args.out)]
     if sha(host) != HOST_SHA256:
@@ -68,21 +68,23 @@ def main():
         raise ValueError('Output directory must be empty')
     paths = [ROOT / 'src/bannersagaui/preview' / (name + '.as')
              for name in ['PreviewFrame', 'PreviewSession', 'PreviewLayer']]
-    if args.mode in ['contract-tests', 'native-needle-probe', 'native-needle-ui']:
+    if args.mode in ['contract-tests', 'native-needle-probe', 'native-needle-ui', 'native-banner-ui']:
         paths.append(ROOT / 'tools/research/NeedleObservationMatch.as')
     if args.mode == 'contract-tests':
         paths.append(ROOT / 'tests/air/PreviewContractTests.as')
     else:
-        if args.mode in ['native-needle-probe', 'native-needle-ui']:
+        if args.mode in ['native-needle-probe', 'native-needle-ui', 'native-banner-ui']:
             paths.append(ROOT / 'tools/research/NeedlePreviewProbe.as')
-        if args.mode == 'native-needle-ui':
+        if args.mode in ['native-needle-ui', 'native-banner-ui']:
             paths.append(ROOT / 'src/bannersagaui/preview/NeedleBannerPreview.as')
         paths.append(ROOT / 'src/bannersagaui/preview/FieldPreview.as')
     sources = [(p.name, p.read_text(encoding='utf-8')) for p in paths]
     if args.mode != 'contract-tests':
         sources.insert(3, ('RamPreviewProvider.as', provider_source(ROOT)))
-    if args.mode in ['native-needle-probe', 'native-needle-ui']:
-        controller = needle_ui_controller_source if args.mode == 'native-needle-ui' else needle_controller_source
+    if args.mode in ['native-needle-probe', 'native-needle-ui', 'native-banner-ui']:
+        controller = {'native-needle-probe':needle_controller_source,
+                      'native-needle-ui':needle_ui_controller_source,
+                      'native-banner-ui':banner_ui_controller_source}[args.mode]
         sources = [(name, controller(source) if name == 'FieldPreview.as' else source)
                    for name, source in sources]
     own = {'bannersagaui.preview.' + Path(name).stem for name, _ in sources}
@@ -141,7 +143,7 @@ def main():
                 'imports': imports, 'sources': {str(p.relative_to(ROOT)): sha(p) for p in paths},
                 'generated_sources': {name: hashlib.sha256(source.encode()).hexdigest()
                                       for name, source in sources if name == 'RamPreviewProvider.as' or
-                                      (args.mode in ['native-needle-probe', 'native-needle-ui'] and name == 'FieldPreview.as')},
+                                      (args.mode in ['native-needle-probe', 'native-needle-ui', 'native-banner-ui'] and name == 'FieldPreview.as')},
                 'generator_inputs': {str(p.relative_to(ROOT)): sha(p) for p in
                                      [Path(__file__).resolve(), ROOT / 'tools/research/preview_module_source.py',
                                       ROOT / 'tools/research/ram_probe_body.as.inc',

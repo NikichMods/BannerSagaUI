@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools/research'))
-from preview_module_source import kernel, once, provider_source, needle_controller_source, ROW_EXTENSION
+from preview_module_source import kernel, once, provider_source, needle_controller_source, needle_ui_controller_source, banner_ui_controller_source, ROW_EXTENSION
 from compile_preview import test_swf as make_test_swf, validate_imports
 from build_field_preview import add_abc, hooks, flag_hook
 from abc_index import swf_tags
@@ -15,6 +15,15 @@ import tempfile
 
 
 class PreviewModuleTests(unittest.TestCase):
+    def test_ram_ui_extension_preserves_existing_calculation_boundary(self):
+        original = (ROOT / 'src/bannersagaui/preview/FieldPreview.as').read_text(encoding='utf-8')
+        previous = needle_ui_controller_source(original)
+        shared = banner_ui_controller_source(original)
+        start, end = 'private function calculate()', 'private function locate('
+        self.assertEqual(previous[previous.index(start):previous.index(end)],
+                         shared[shared.index(start):shared.index(end)])
+        self.assertIn('ability.def.targetRule == BattleAbilityTargetRule.SPECIAL_BATTERING_RAM))', shared)
+
     def test_flag_hook_projects_only_request_operand(self):
         operand = 'getlocal1\ngetproperty QName(Namespace("engine.battle.board.model:IBattleEntity"),"battleInfoFlagVisible")\n'
         original = 'maxstack 2\ncode\ngetlocal0\npushscope\n' + operand + 'pop\nreturnvoid\nend ; code\n'

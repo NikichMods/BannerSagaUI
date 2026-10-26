@@ -13,6 +13,11 @@ package bannersagaui.preview {
 
         public function get targetId():String { return target; }
 
+        public static function changeText(before:int, after:int):String {
+            var change:int = after - before;
+            return change > 0 ? "+" + change : String(change);
+        }
+
         public static function fromResult(result:Object, target:String):PreviewFrame {
             if (!result || result.status != "ready" || result.restored !== true ||
                 result.cacheRestored !== true || !target || !(result.rows is Array)) return null;

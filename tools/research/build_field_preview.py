@@ -101,7 +101,7 @@ def main():
         raise ValueError('Expected original host and new output outside game')
     manifest = json.loads((module_dir / 'manifest.json').read_text(encoding='utf-8'))
     module = module_dir / 'preview.abc'
-    if (manifest['mode'] not in ['native-module', 'native-needle-probe', 'native-needle-ui'] or manifest['host_sha256'] != HOST_SHA256 or
+    if (manifest['mode'] not in ['native-module', 'native-needle-probe', 'native-needle-ui', 'native-banner-ui'] or manifest['host_sha256'] != HOST_SHA256 or
         manifest['outputs']['preview.abc'] != sha(module)):
         raise ValueError('Expected verified native-module ABC')
     root = Path(__file__).resolve().parents[2]
@@ -137,7 +137,7 @@ def main():
         path = out / (name + '.pcode')
         path.write_text(text, encoding='utf-8')
         replacement.extend([CLASS, path, indices[name]])
-    if manifest['mode'] == 'native-needle-ui':
+    if manifest['mode'] in ['native-needle-ui', 'native-banner-ui']:
         command(java, ffdec, '-format', 'script:pcode', '-selectclass', FLAGS_CLASS,
                 '-export', 'script', out / 'flag-export', assembled, cwd=out)
         flag_text = (out / 'flag-export/scripts/game/gui/page/ScenePageBattleInfoFlags.pcode').read_text(encoding='utf-8-sig')
@@ -147,7 +147,8 @@ def main():
         flag_path = out / 'flag-visibility.pcode'
         flag_path.write_text(flag_hook(flag_method), encoding='utf-8')
         replacement.extend([FLAGS_CLASS, flag_path, indices['flagVisibility']])
-    label = {'native-needle-probe':'FieldPreview-NeedleProbe', 'native-needle-ui':'FieldPreview-NeedleUI'}.get(manifest['mode'], 'FieldPreview')
+    label = {'native-needle-probe':'FieldPreview-NeedleProbe', 'native-needle-ui':'FieldPreview-NeedleUI',
+             'native-banner-ui':'FieldPreview-BannerUI'}.get(manifest['mode'], 'FieldPreview')
     output = out / ('BannerSagaUI-' + version + '-' + label + '.swf')
     command(java, ffdec, '-replace', assembled, output, *replacement, cwd=out)
     report = compare(assembled, output)
