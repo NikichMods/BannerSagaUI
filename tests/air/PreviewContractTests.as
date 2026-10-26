@@ -3,6 +3,7 @@ package bannersagaui.tests {
     import bannersagaui.preview.PreviewFrame;
     import bannersagaui.preview.PreviewSession;
     import bannersagaui.preview.PreviewLayer;
+    import bannersagaui.preview.NeedleObservationMatch;
     import flash.desktop.NativeApplication;
     import flash.display.Sprite;
     import flash.geom.Point;
@@ -46,7 +47,41 @@ package bannersagaui.tests {
             return {valid:true, board:{}, turn:{}, ability:{}, casterId:"caster", targetId:"target", level:1};
         }
 
+        private function observationCandidate(request:Object):Object {
+            return {instance:{}, board:request.board, turn:request.turn, caster:"archer",
+                ability:"needle", level:1, fake:false, casterState:"caster-original-state",
+                rows:[{id:"A", state:"A-original-state"}, {id:"B", state:"B-original-state"}]};
+        }
+        private function observationChecks():void {
+            var request:Object = {instance:{}, board:{}, turn:{}, caster:"archer", ability:"needle",
+                level:1, casterState:"caster-original-state",
+                rows:[{id:"A", state:"A-original-state"}, {id:"B", state:"B-original-state"}]};
+            var candidate:Object = observationCandidate(request);
+            check(candidate.instance !== request.instance && NeedleObservationMatch.reason(request,candidate) == "",
+                "different execution object can match same request");
+            candidate.fake = true;
+            check(NeedleObservationMatch.reason(request,candidate) == "fake", "popup fake cannot bind");
+            candidate = observationCandidate(request); candidate.board = {};
+            check(NeedleObservationMatch.reason(request,candidate) == "context", "foreign board cannot bind");
+            candidate = observationCandidate(request); candidate.turn = {};
+            check(NeedleObservationMatch.reason(request,candidate) == "context", "later turn cannot bind");
+            candidate = observationCandidate(request); candidate.caster = "other";
+            check(NeedleObservationMatch.reason(request,candidate) == "caster", "other caster cannot bind");
+            candidate = observationCandidate(request); candidate.ability = "other";
+            check(NeedleObservationMatch.reason(request,candidate) == "ability", "other ability cannot bind");
+            candidate = observationCandidate(request); candidate.level = 2;
+            check(NeedleObservationMatch.reason(request,candidate) == "rank", "changed rank cannot bind");
+            candidate = observationCandidate(request); candidate.casterState = "changed";
+            check(NeedleObservationMatch.reason(request,candidate) == "caster-state", "changed caster cannot bind");
+            candidate = observationCandidate(request); candidate.rows.pop();
+            check(NeedleObservationMatch.reason(request,candidate) == "target-count", "partial line cannot bind");
+            candidate = observationCandidate(request); candidate.rows.reverse();
+            check(NeedleObservationMatch.reason(request,candidate) == "target-order", "reordered line cannot bind");
+            candidate = observationCandidate(request); candidate.rows[1].state = "changed";
+            check(NeedleObservationMatch.reason(request,candidate) == "target-state", "changed target cannot bind");
+        }
         private function run():void {
+            observationChecks();
             var unchanged:Object = row("unchanged"); unchanged.armorBefore = unchanged.armor;
             var aura:Object = row("aura"); aura.armorBefore = aura.armor; aura.auraAfter = 1;
             var input:Object = result([row(), unchanged, aura]);

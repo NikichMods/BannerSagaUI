@@ -41,6 +41,9 @@ class PreviewModuleTests(unittest.TestCase):
         self.assertIn('BSUI_NEEDLE_OBSERVER_EVENT', modified)
         self.assertIn('BSUI_NEEDLE_OBSERVER_PENDING', modified)
         self.assertIn('readNeedleActual(action, prediction);', modified)
+        self.assertIn('BattleAbilityEvent.EXECUTING, needleExecuting', modified)
+        self.assertIn('NeedleObservationMatch.reason(needleRequest, describeNeedleAction(actual))', modified)
+        self.assertIn('BSUI_NEEDLE_OBSERVER_BIND', modified)
         self.assertIn('clearNeedleObservation();', modified.split('private function dispose():void {')[1])
         self.assertEqual(original[original.index('private function locate('):original.index('private function update(')],
                          modified[modified.index('private function locate('):modified.index('private function update(')])

@@ -85,7 +85,9 @@ def needle_controller_source(source):
         'private var failed:Boolean = false;\n'
         '        private var needleAction:BattleAbility;\n'
         '        private var needleResult:Object;\n'
-        '        private var needleDispatcher:IEventDispatcher;')
+        '        private var needleDispatcher:IEventDispatcher;\n'
+        '        private var needleRequest:Object;\n'
+        '        private var needleSelectedId:int;')
     source = once(source, 'var result:Object = RamPreviewProvider.calculate(ability.def, ability.caster, target);',
         '''if (ability.def.id == "abl_threadtheneedle") {
                 var needle:Object = NeedlePreviewProbe.calculate(ability);
@@ -118,9 +120,11 @@ def needle_controller_source(source):
     source = once(source, 'private function dispose():void {', '''
         private function armNeedleObservation(action:BattleAbility, prediction:Object):Boolean {
             try {
-                needleAction = action; needleResult = prediction;
+                needleAction = null; needleResult = prediction;
+                needleSelectedId = action.id; needleRequest = describeNeedleAction(action);
                 needleDispatcher = board.abilityManager as IEventDispatcher;
                 if (!needleDispatcher) throw new Error("Ability manager is not a dispatcher");
+                needleDispatcher.addEventListener(BattleAbilityEvent.EXECUTING, needleExecuting);
                 needleDispatcher.addEventListener(BattleAbilityEvent.ABILITY_AND_CHILDREN_COMPLETE, needleCompleted);
                 board.logger.info("BSUI_NEEDLE_OBSERVER_ARM " + JSON.stringify({
                     action:action.id, caster:action.caster.id,
@@ -133,9 +137,49 @@ def needle_controller_source(source):
             }
         }
         private function clearNeedleObservation():void {
-            if (needleDispatcher) needleDispatcher.removeEventListener(
-                BattleAbilityEvent.ABILITY_AND_CHILDREN_COMPLETE, needleCompleted);
-            needleDispatcher = null; needleAction = null; needleResult = null;
+            if (needleDispatcher) {
+                needleDispatcher.removeEventListener(BattleAbilityEvent.EXECUTING, needleExecuting);
+                needleDispatcher.removeEventListener(BattleAbilityEvent.ABILITY_AND_CHILDREN_COMPLETE, needleCompleted);
+            }
+            needleDispatcher = null; needleAction = null; needleResult = null; needleRequest = null;
+        }
+        private function needleState(entity:IBattleEntity):String {
+            var parts:Array = [entity.id, entity.x, entity.y, entity.alive];
+            for (var i:int = 0; i < entity.stats.numStats; i++) {
+                var stat:Object = entity.stats.getStatByIndex(i);
+                parts.push(stat.type.name, stat.base, stat.original, stat.value, stat.getDebugStringMods(""));
+            }
+            return JSON.stringify(parts);
+        }
+        private function describeNeedleAction(action:BattleAbility):Object {
+            var rows:Array = [];
+            for each (var entity:IBattleEntity in action.targetSet.targets)
+                rows.push({id:entity.id, state:needleState(entity)});
+            return {board:board, turn:board.fsm.turn, caster:action.caster.id,
+                ability:action.def.id, level:action.def.level, fake:board.fake || action.fake,
+                casterState:needleState(action.caster), rows:rows};
+        }
+        private function needleExecuting(event:BattleAbilityEvent):void {
+            try {
+                var actual:BattleAbility = event.ability as BattleAbility;
+                if (!needleResult || needleAction || !actual || actual.def.id != "abl_threadtheneedle") return;
+                // Native popup forecasts also execute temporary abilities.
+                if (board.fake || actual.fake) return;
+                var rejection:String = NeedleObservationMatch.reason(needleRequest, describeNeedleAction(actual));
+                if (rejection) {
+                    board.logger.info("BSUI_NEEDLE_OBSERVER_REJECT " + JSON.stringify({
+                        reason:rejection, selected:needleSelectedId, action:actual.id}));
+                    clearNeedleObservation();
+                    return;
+                }
+                needleAction = actual;
+                needleDispatcher.removeEventListener(BattleAbilityEvent.EXECUTING, needleExecuting);
+                board.logger.info("BSUI_NEEDLE_OBSERVER_BIND " + JSON.stringify({
+                    selected:needleSelectedId, action:actual.id, executedId:actual.executedId}));
+            } catch (failure:*) {
+                board.logger.error("BSUI_NEEDLE_OBSERVER_ERROR bind " + String(failure));
+                clearNeedleObservation();
+            }
         }
         private function needleCompleted(event:BattleAbilityEvent):void {
             try {
@@ -196,7 +240,9 @@ def needle_controller_source(source):
                 level:action.def.level, rows:actual, prediction:prediction.rows}));
         }
         private function dispose():void {
-            if (needleAction) board.logger.info("BSUI_NEEDLE_OBSERVER_PENDING " + JSON.stringify({
-                action:needleAction.id, executed:needleAction.executed, completed:needleAction.finalCompleted}));
+            if (needleResult) board.logger.info("BSUI_NEEDLE_OBSERVER_PENDING " + JSON.stringify({
+                selected:needleSelectedId, bound:needleAction != null,
+                action:needleAction ? needleAction.id : 0,
+                executed:needleAction ? needleAction.executed : false}));
             clearNeedleObservation();''')
     return source

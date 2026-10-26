@@ -68,6 +68,8 @@ def main():
         raise ValueError('Output directory must be empty')
     paths = [ROOT / 'src/bannersagaui/preview' / (name + '.as')
              for name in ['PreviewFrame', 'PreviewSession', 'PreviewLayer']]
+    if args.mode in ['contract-tests', 'native-needle-probe']:
+        paths.append(ROOT / 'tools/research/NeedleObservationMatch.as')
     if args.mode == 'contract-tests':
         paths.append(ROOT / 'tests/air/PreviewContractTests.as')
     else:
