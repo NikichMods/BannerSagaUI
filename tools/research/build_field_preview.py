@@ -21,6 +21,20 @@ from compare_swf import compare
 from compile_preview import HOST_SHA256
 
 CLASS = 'game.gui.page.ScenePage'
+FLAGS_CLASS = 'game.gui.page.ScenePageBattleInfoFlags'
+
+
+def flag_hook(original):
+    """Project only the native visibility-request operand; retain every guard."""
+    operand = 'getlocal1\ngetproperty QName(Namespace("engine.battle.board.model:IBattleEntity"),"battleInfoFlagVisible")\n'
+    if original.count(operand) != 1:
+        raise ValueError('Unexpected native flag visibility operand')
+    replacement = (f'getlex {q("NeedleBannerPreview", "bannersagaui.preview")}\ngetlocal1\n' +
+                   operand + f'callproperty {q("requested")}, 2\n')
+    result = original.replace(operand, replacement, 1)
+    result = re.sub(r'^maxstack (\d+)$', lambda m: 'maxstack ' + str(int(m[1]) + 2), result, flags=re.M)
+    require_balanced(result)
+    return result
 
 
 def sha(path):
@@ -87,7 +101,7 @@ def main():
         raise ValueError('Expected original host and new output outside game')
     manifest = json.loads((module_dir / 'manifest.json').read_text(encoding='utf-8'))
     module = module_dir / 'preview.abc'
-    if (manifest['mode'] not in ['native-module', 'native-needle-probe'] or manifest['host_sha256'] != HOST_SHA256 or
+    if (manifest['mode'] not in ['native-module', 'native-needle-probe', 'native-needle-ui'] or manifest['host_sha256'] != HOST_SHA256 or
         manifest['outputs']['preview.abc'] != sha(module)):
         raise ValueError('Expected verified native-module ABC')
     root = Path(__file__).resolve().parents[2]
@@ -123,14 +137,24 @@ def main():
         path = out / (name + '.pcode')
         path.write_text(text, encoding='utf-8')
         replacement.extend([CLASS, path, indices[name]])
-    label = 'FieldPreview-NeedleProbe' if manifest['mode'] == 'native-needle-probe' else 'FieldPreview'
+    if manifest['mode'] == 'native-needle-ui':
+        command(java, ffdec, '-format', 'script:pcode', '-selectclass', FLAGS_CLASS,
+                '-export', 'script', out / 'flag-export', assembled, cwd=out)
+        flag_text = (out / 'flag-export/scripts/game/gui/page/ScenePageBattleInfoFlags.pcode').read_text(encoding='utf-8-sig')
+        flag_method = extract_method(flag_text, 'private function _updateEntity(')
+        flag_id = next(t['method'] for t in before.classes[FLAGS_CLASS]['instance'] if t['name'] == '_updateEntity')
+        indices['flagVisibility'] = next(b['index'] for b in before.bodies if b['method'] == flag_id)
+        flag_path = out / 'flag-visibility.pcode'
+        flag_path.write_text(flag_hook(flag_method), encoding='utf-8')
+        replacement.extend([FLAGS_CLASS, flag_path, indices['flagVisibility']])
+    label = {'native-needle-probe':'FieldPreview-NeedleProbe', 'native-needle-ui':'FieldPreview-NeedleUI'}.get(manifest['mode'], 'FieldPreview')
     output = out / ('BannerSagaUI-' + version + '-' + label + '.swf')
     command(java, ffdec, '-replace', assembled, output, *replacement, cwd=out)
     report = compare(assembled, output)
     if not report['frame_header_equal'] or len(report['changed_tags']) != 1:
         raise ValueError('Unexpected hook tag changes')
     change = report['changed_tags'][0]
-    if (change['changed_method_info_count'] or change['changed_body_count'] != 2 or
+    if (change['changed_method_info_count'] or change['changed_body_count'] != len(indices) or
         {b['index'] for b in change['changed_bodies']} != set(indices.values())):
         raise ValueError('Unexpected native method changes')
     _, after = next((i, a) for i, a in abcs(output) if CLASS in a.classes)
@@ -149,11 +173,14 @@ def main():
     # FFDec must preserve isolated own ABC exactly, too.
     if swf_tags(output)[module_tag] != swf_tags(assembled)[module_tag]:
         raise ValueError('Own module changed during native hook import')
-    command(java, ffdec, '-format', 'script:pcode', '-selectclass', ','.join([CLASS] + manifest['classes']),
+    command(java, ffdec, '-format', 'script:pcode', '-selectclass', ','.join([CLASS, FLAGS_CLASS] + manifest['classes']),
             '-export', 'script', out / 'final-export', output, cwd=out)
     final_export = (out / 'final-export/scripts/game/gui/page/ScenePage.pcode').read_text(encoding='utf-8-sig')
     checks = {name: require_balanced(extract_method(final_export,
               'override public function ' + name + '(')) for name in methods}
+    if 'flagVisibility' in indices:
+        final_flags = (out / 'final-export/scripts/game/gui/page/ScenePageBattleInfoFlags.pcode').read_text(encoding='utf-8-sig')
+        checks['flagVisibility'] = require_balanced(extract_method(final_flags, 'private function _updateEntity('))
     module_checks = []
     for classname in manifest['classes']:
         path = out / 'final-export/scripts' / (classname.replace('.', '/') + '.pcode')

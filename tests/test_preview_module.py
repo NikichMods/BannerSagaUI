@@ -8,13 +8,22 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools/research'))
 from preview_module_source import kernel, once, provider_source, needle_controller_source, ROW_EXTENSION
 from compile_preview import test_swf as make_test_swf, validate_imports
-from build_field_preview import add_abc, hooks
+from build_field_preview import add_abc, hooks, flag_hook
 from abc_index import swf_tags
 from test_swf_research import synthetic_abc
 import tempfile
 
 
 class PreviewModuleTests(unittest.TestCase):
+    def test_flag_hook_projects_only_request_operand(self):
+        operand = 'getlocal1\ngetproperty QName(Namespace("engine.battle.board.model:IBattleEntity"),"battleInfoFlagVisible")\n'
+        original = 'maxstack 2\ncode\ngetlocal0\npushscope\n' + operand + 'pop\nreturnvoid\nend ; code\n'
+        patched = flag_hook(original)
+        self.assertIn(operand, patched)
+        self.assertIn('"requested"', patched)
+        with self.assertRaises(ValueError):
+            flag_hook(original.replace('battleInfoFlagVisible', 'changedOwner'))
+
     def test_direct_api_preserves_calculation_and_restoration(self):
         original = (ROOT / 'tools/research/ram_probe_body.as.inc').read_text(encoding='utf-8')
         direct = provider_source(ROOT)

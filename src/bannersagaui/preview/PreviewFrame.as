@@ -32,7 +32,7 @@ package bannersagaui.preview {
                 if (row.id == target) found = true;
                 // Always include the primary target, including zero-damage or
                 // damage compensated by a new aura. Neighbours need a change.
-                if (row.id == target || row.armorBefore != row.armor ||
+                if (result.allTargets === true || row.id == target || row.armorBefore != row.armor ||
                     row.strengthBefore != row.strength || row.auraBefore != row.auraAfter) {
                     rows.push(copy(row));
                 }

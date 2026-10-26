@@ -81,6 +81,13 @@ package bannersagaui.tests {
             check(NeedleObservationMatch.reason(request,candidate) == "target-state", "changed target cannot bind");
         }
         private function run():void {
+            var protectedRow:Object = row("protected"); protectedRow.armor = protectedRow.armorBefore;
+            var line:Object = result([protectedRow, row()]); line.allTargets = true;
+            check(PreviewFrame.fromResult(line, "target").rows.length == 2,
+                "explicit affected set keeps a protected intermediate target");
+            delete line.allTargets;
+            check(PreviewFrame.fromResult(line, "target").rows.length == 1,
+                "ordinary neighbour filtering remains unchanged");
             observationChecks();
             var unchanged:Object = row("unchanged"); unchanged.armorBefore = unchanged.armor;
             var aura:Object = row("aura"); aura.armorBefore = aura.armor; aura.auraAfter = 1;

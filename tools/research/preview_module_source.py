@@ -246,3 +246,29 @@ def needle_controller_source(source):
                 executed:needleAction ? needleAction.executed : false}));
             clearNeedleObservation();''')
     return source
+
+
+def needle_ui_controller_source(source):
+    """Reuse test.15's calculation/observer; opt into the native-banner UI."""
+    source = needle_controller_source(source)
+    source = once(source, 'private var needleSelectedId:int;',
+                  'private var needleSelectedId:int;\n        private var needleBanners:NeedleBannerPreview;')
+    source = once(source, 'page = owner; board = model; view = visual;',
+                  'page = owner; board = model; view = visual;\n            needleBanners = new NeedleBannerPreview(page, board);')
+    source = once(source, '''return {status:needle.status == "error" ? "error" : "unsupported",
+                    reason:"needle-query-log-only", restored:needle.restored,
+                    cacheRestored:needle.cacheRestored, rows:[]};''',
+                  'return NeedleBannerPreview.result(needle, board);')
+    source = once(source, 'var frame:PreviewFrame = session.refresh(context, calculate);',
+                  '''var frame:PreviewFrame = session.refresh(context, calculate);
+            if (ability && ability.def.id == "abl_threadtheneedle") {
+                needleBanners.show(frame); layer.clear(); last = null; return;
+            }
+            needleBanners.show(null);''')
+    source = once(source, 'session.invalidate(); layer.clear(); last = null;',
+                  'session.invalidate(); needleBanners.show(null); layer.clear(); last = null;')
+    source = once(source, 'existing.layer.clear();',
+                  'existing.layer.clear();\n                existing.needleBanners.show(null);')
+    source = once(source, 'unwatch(); session.dispose(); layer.clear();',
+                  'unwatch(); session.dispose(); needleBanners.dispose(); layer.clear();')
+    return source
