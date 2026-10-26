@@ -123,3 +123,6 @@
 
 
 Для следующей исследовательской test.14 consumer ACTUAL переведён на native manager event с identity действия и явными ARM/EVENT/SKIP/PENDING/error; чтение результата отделено от callback. До callback смены хода по source-порядку, без нового native hook. Обоснование/пределы доказательства — RESEARCH.md. test.14 установлена; проход26.10 подтвердил регистрацию/доставку, но strict identity selected-объекта блокирует ACTUAL, сохранённый объект не исполнялся. Привязка к настоящему EXECUTING ещё не реализована, полного MATCH нет; точные хеши — TEST_BUILD_LOG.md. Прогноз/cleanup test.13 не менялись.
+
+
+В test.15 запрос связывается с настоящим nonfake manager EXECUTING до deductCosts/эффектов через проверку контекста/порядка целей/исходного состояния; далее completion фильтруется identity реального action. Чистый NeedleObservationMatch прошёл11новых самостоятельных AIR-проверок, не содержащих game ABC. test.15 установлена, native BIND/ACTUAL ещё требуют прохода; RESEARCH.md/TEST_BUILD_LOG.md владеют методом и точной идентичностью. Прогноз/cleanup не менялись, RTF guard не снят.
